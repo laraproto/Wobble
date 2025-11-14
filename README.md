@@ -1,21 +1,9 @@
-# bun-react-tailwind-shadcn-template
+# Wobble
 
-To install dependencies:
+Silly discord bot with the intention of being incredibly easy to run, drop an executable and run
 
-```bash
-bun install
-```
+## Roadmap
 
-To start a development server:
-
-```bash
-bun dev
-```
-
-To run for production:
-
-```bash
-bun start
-```
-
-This project was created using `bun init` in bun v1.3.2. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
+- [ ] Command System
+- [ ] Dashboard
+- [ ] Permissions system
