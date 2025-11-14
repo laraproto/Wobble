@@ -1,32 +1,13 @@
 import { serve } from "bun";
-import index from "./index.html";
+import routes from "@routes/index";
+import index from "./index.html" with { type: "html" };
 
 const server = serve({
   routes: {
     // Serve index.html for all unmatched routes.
     "/*": index,
 
-    "/api/hello": {
-      async GET() {
-        return Response.json({
-          message: "Hello, world!",
-          method: "GET",
-        });
-      },
-      async PUT() {
-        return Response.json({
-          message: "Hello, world!",
-          method: "PUT",
-        });
-      },
-    },
-
-    "/api/hello/:name": async (req) => {
-      const name = req.params.name;
-      return Response.json({
-        message: `Hello, ${name}!`,
-      });
-    },
+    "/api/*": routes.fetch,
   },
 
   development: process.env.NODE_ENV !== "production" && {

@@ -20,7 +20,8 @@
     "typescript": "^5"
   },
   "workspaces": [
-    "website"
+    "website",
+    "bot"
   ],
   "dependencies": {
     "eslint-config-prettier": "^10.1.8",
