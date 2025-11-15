@@ -44,6 +44,8 @@ export function APITester() {
           </SelectTrigger>
           <SelectContent align="start">
             <SelectItem value="GET">GET</SelectItem>
+            <SelectItem value="POST">POST</SelectItem>
+            <SelectItem value="PATCH">PATCH</SelectItem>
             <SelectItem value="PUT">PUT</SelectItem>
           </SelectContent>
         </Select>
