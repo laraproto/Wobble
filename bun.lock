@@ -40,6 +40,8 @@
       "dependencies": {
         "@electric-sql/pglite": "^0.3.14",
         "@hono/trpc-server": "^0.4.0",
+        "@oslojs/crypto": "^1.0.1",
+        "@oslojs/encoding": "^1.1.0",
         "@radix-ui/react-label": "^2.1.8",
         "@radix-ui/react-select": "^2.2.6",
         "@radix-ui/react-separator": "^1.1.8",

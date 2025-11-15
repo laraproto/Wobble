@@ -27,7 +27,8 @@
       "@pages/*": ["./src/pages/*"],
       "@modules/*": ["./src/modules/*"],
       "@lib/*": ["./src/lib/*"],
-      "@routes/*": ["./src/routes/*"]
+      "@routes/*": ["./src/routes/*"],
+      "@middleware/*": ["./src/middleware/*"]
     },
 
     // Some stricter flags (disabled by default)

@@ -69,3 +69,14 @@ export const userSelectWithSessions = z.object({
   ...userSelectSchema.shape,
   sessions: z.array(sessionSelectSchema),
 });
+
+export type User = z.infer<typeof userSelectSchema>;
+export type UserMinimal = z.infer<typeof userSelectMinimal>;
+export type UserMinimalWithSessions = z.infer<
+  typeof userSelectMinimalWithSessions
+>;
+export type UserWithSessions = z.infer<typeof userSelectWithSessions>;
+
+export type Session = z.infer<typeof sessionSelectSchema>;
+export type SessionInsert = z.infer<typeof sessionInsertSchema>;
+export type UserInsert = z.infer<typeof userInsertSchema>;
