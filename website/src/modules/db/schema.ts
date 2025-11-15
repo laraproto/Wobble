@@ -49,3 +49,23 @@ export const sessionRelations = relations(session, ({ one }) => ({
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
 }));
+
+export const userSelectSchema = createSelectSchema(user);
+export const userInsertSchema = createInsertSchema(user);
+
+export const sessionSelectSchema = createSelectSchema(session);
+export const sessionInsertSchema = createInsertSchema(session);
+
+export const userSelectMinimal = userSelectSchema.omit({
+  totpSecret: true,
+});
+
+export const userSelectMinimalWithSessions = z.object({
+  ...userSelectMinimal.shape,
+  sessions: z.array(sessionSelectSchema),
+});
+
+export const userSelectWithSessions = z.object({
+  ...userSelectSchema.shape,
+  sessions: z.array(sessionSelectSchema),
+});

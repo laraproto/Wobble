@@ -1,8 +1,11 @@
 import reactLogo from "@/react.svg";
-import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { trpc } from "@lib/trpc";
 
 export function Home() {
+  const helloQuery = useQuery(trpc.hello.queryOptions({}));
+
   return (
     <div className="container mx-auto p-8 text-center relative z-10">
       <div className="flex lg:flex-row flex-col ">
@@ -16,6 +19,13 @@ export function Home() {
           <li>
             Small, easy to use discord bot, just download and run (Logo is just
             react logo, so placeholder)
+          </li>
+          <li>
+            {helloQuery.isLoading ? (
+              <span>Loading...</span>
+            ) : (
+              <span>{helloQuery.data}</span>
+            )}
           </li>
           <li>
             <div className="flex flex-row justify-center pt-4">
