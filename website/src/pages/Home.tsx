@@ -1,9 +1,11 @@
 import reactLogo from "@/react.svg";
 import { Button } from "@/components/ui/button";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { trpc } from "@lib/trpc";
+import { Link } from "wouter";
 
 export function Home() {
+  const configurationQuery = useQuery(trpc.configuration.queryOptions());
   const helloQuery = useQuery(trpc.hello.queryOptions({}));
 
   return (
@@ -12,7 +14,7 @@ export function Home() {
         <img
           src={reactLogo}
           alt="React Logo"
-          className="h-36 p-6 transition-all duration-300 hover:drop-shadow-[0_0_2em_#61dafbaa] animate-[spin_20s_linear_infinite]"
+          className="h-48 p-6 transition-all duration-300 hover:drop-shadow-[0_0_2em_#61dafbaa] animate-[spin_20s_linear_infinite]"
         />
         <ul className="lg:ml-6 flex flex-col justify-center gap-2 w-120">
           <li className="grid gap-2 text-4xl pb-4 font-bold">Wobble</li>
@@ -28,10 +30,21 @@ export function Home() {
             )}
           </li>
           <li>
-            <div className="flex flex-row justify-center pt-4">
-              <Button asChild>
-                <a href="/api/auth">Get Started</a>
-              </Button>
+            <div className="flex flex-row justify-center pt-4 space-x-4">
+              {configurationQuery.isLoading ? (
+                <span>Hold a sec.</span>
+              ) : (
+                <>
+                  <Button asChild>
+                    <a href="/api/auth">Dashboard</a>
+                  </Button>
+                  {!configurationQuery.data?.installed && (
+                    <Button asChild>
+                      <Link href="/installer">Installer</Link>
+                    </Button>
+                  )}
+                </>
+              )}
             </div>
           </li>
         </ul>

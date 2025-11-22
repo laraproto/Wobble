@@ -15,6 +15,7 @@ declare global {
   interface BigInt {
     toJSON(): string;
   }
+  var installerPassword: string;
 }
 
 export {};

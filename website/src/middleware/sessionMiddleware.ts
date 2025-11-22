@@ -11,7 +11,7 @@ const sessionMiddleware = createMiddleware<{
   };
 }>(async (c, next) => {
   if (!db) {
-    console.log("[sessionHandler] Installer Wizard not completed");
+    //console.log("[sessionHandler] Installer Wizard not completed");
     await next();
     return;
   }
@@ -39,3 +39,5 @@ const sessionMiddleware = createMiddleware<{
   await next();
   return;
 });
+
+export default sessionMiddleware;

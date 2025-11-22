@@ -13,8 +13,10 @@ export let db:
 let client: SQL | PGlite | undefined = undefined;
 
 const buildDatabaseClient = () => {
-  if (!installerConfig?.database_url)
-    throw new Error("Database URL is not defined in installer configuration");
+  if (!installerConfig?.database_url) {
+    console.log("Database URL is not defined in installer configuration");
+    return;
+  }
   switch (installerConfig.database_type) {
     case "pglite":
       return new PGlite(pgliteDir);
