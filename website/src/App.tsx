@@ -3,11 +3,12 @@ import "./index.css";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Route, Switch } from "wouter";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "./lib/trpc";
+
 import { Home } from "./pages/Home";
 import { Test } from "./pages/Test";
 import { NotFound } from "./pages/NotFound";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { queryClient } from "./lib/trpc";
 import { Installer } from "./pages/Installer";
 
 export function App() {
