@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/card";
 import {
   Field,
+  FieldContent,
   FieldDescription,
   FieldError,
   FieldGroup,
@@ -21,8 +22,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { useForm, useStore } from "@tanstack/react-form";
+import { zodSnowflake } from "@/types/discord";
 import { toast } from "sonner";
 import z from "zod";
 
@@ -30,7 +33,7 @@ const installerSchema = z.object({
   databaseType: z.enum(["pglite", "postgresql"]),
   databaseUrl: z.string(),
   botToken: z.string().min(1, "Bot token is required"),
-  clientId: z.string().min(1, "Client ID is required"),
+  clientId: zodSnowflake.min(1, "Client ID is required"),
   clientSecret: z.string().min(1, "Client Secret is required"),
   registrationEnabled: z.boolean(),
 });
@@ -49,8 +52,27 @@ export function Installer() {
       onSubmit: installerSchema,
     },
     onSubmit: async ({ value }) => {
-      console.log("what");
-      toast.success("Form submitted");
+      if (
+        value.databaseType === "postgresql" &&
+        value.databaseUrl.trim() === ""
+      ) {
+        return {
+          fields: {
+            databaseUrl: "Database URL is required when using postgresql",
+          },
+        };
+      }
+      toast.success("Form submitted", {
+        description: (
+          <pre className="bg-code text-code-foreground mt-2 w-[320px] overflow-x-auto rounded-md p-4">
+            <code>{JSON.stringify(value, null, 2)}</code>
+          </pre>
+        ),
+        classNames: {
+          content: "flex flex-col gap-2",
+        },
+      });
+      console.table(value);
     },
   });
 
@@ -61,7 +83,7 @@ export function Installer() {
   );
 
   return (
-    <div className="container mx-auto p-8 text-center relative z-10 w-96">
+    <div className="container mx-auto p-8 text-center relative z-10 w-96 lg:w-lg">
       <Card>
         <CardHeader>
           <CardTitle>Installer</CardTitle>
@@ -88,9 +110,7 @@ export function Installer() {
                       </FieldLabel>
                       <Select
                         name={field.name}
-                        value={
-                          (field.state as { value: string | undefined }).value
-                        }
+                        value={field.state.value}
                         onValueChange={(e) => field.handleChange(e)}
                       >
                         <SelectTrigger>
@@ -123,10 +143,9 @@ export function Installer() {
                         <Input
                           id={field.name}
                           name={field.name}
-                          value={
-                            (field.state as { value: string | undefined }).value
-                          }
+                          value={field.state.value}
                           onBlur={field.handleBlur}
+                          placeholder="postgres://username:password@host:port/database"
                           onChange={(e) => field.handleChange(e.target.value)}
                           aria-invalid={isInvalid}
                         />
@@ -138,18 +157,122 @@ export function Installer() {
                   }}
                 />
               )}
+              <form.Field
+                name="clientId"
+                children={(field) => {
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid;
+
+                  return (
+                    <Field data-invalid={isInvalid}>
+                      <FieldLabel htmlFor={field.name}>Client ID</FieldLabel>
+                      <Input
+                        id={field.name}
+                        name={field.name}
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        aria-invalid={isInvalid}
+                      />
+                      {isInvalid && (
+                        <FieldError errors={field.state.meta.errors} />
+                      )}
+                    </Field>
+                  );
+                }}
+              />
+              <form.Field
+                name="clientSecret"
+                children={(field) => {
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid;
+
+                  return (
+                    <Field data-invalid={isInvalid}>
+                      <FieldLabel htmlFor={field.name}>
+                        Client Secret
+                      </FieldLabel>
+                      <Input
+                        id={field.name}
+                        name={field.name}
+                        value={field.state.value}
+                        type="password"
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        aria-invalid={isInvalid}
+                      />
+                      {isInvalid && (
+                        <FieldError errors={field.state.meta.errors} />
+                      )}
+                    </Field>
+                  );
+                }}
+              />
+              <form.Field
+                name="botToken"
+                children={(field) => {
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid;
+
+                  return (
+                    <Field data-invalid={isInvalid}>
+                      <FieldLabel htmlFor={field.name}>Bot Token</FieldLabel>
+                      <Input
+                        id={field.name}
+                        name={field.name}
+                        value={field.state.value}
+                        type="password"
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        aria-invalid={isInvalid}
+                      />
+                      {isInvalid && (
+                        <FieldError errors={field.state.meta.errors} />
+                      )}
+                    </Field>
+                  );
+                }}
+              />
+              <form.Field
+                name="registrationEnabled"
+                children={(field) => {
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid;
+
+                  return (
+                    <Field data-invalid={isInvalid} orientation="horizontal">
+                      <Checkbox
+                        id={field.name}
+                        name={field.name}
+                        checked={field.state.value}
+                        onBlur={field.handleBlur}
+                        onCheckedChange={(e) =>
+                          field.handleChange(e as boolean)
+                        }
+                        aria-invalid={isInvalid}
+                      />
+                      <FieldContent>
+                        <FieldLabel htmlFor={field.name}>
+                          Enable User Registration
+                        </FieldLabel>
+                        <FieldDescription className="text-left">
+                          Allow users to freely register and start using the
+                          bot, otherwise invite codes will need to be given out
+                        </FieldDescription>
+                      </FieldContent>
+                      {isInvalid && (
+                        <FieldError errors={field.state.meta.errors} />
+                      )}
+                    </Field>
+                  );
+                }}
+              />
             </FieldGroup>
           </form>
         </CardContent>
         <CardFooter className="pt-4">
           <Field orientation="horizontal">
-            <Button
-              type="submit"
-              form="installer-form"
-              onClick={(e) => {
-                form.handleSubmit();
-              }}
-            >
+            <Button type="submit" form="installer-form">
               Submit
             </Button>
           </Field>

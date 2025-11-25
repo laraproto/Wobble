@@ -23,7 +23,7 @@ export function App() {
 
             <Route component={NotFound} />
           </Switch>
-          <Toaster />
+          <Toaster position="top-center" />
         </QueryClientProvider>
       </ThemeProvider>
     </>
