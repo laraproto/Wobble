@@ -26,6 +26,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { useForm, useStore } from "@tanstack/react-form";
 import { zodSnowflake } from "@/types/discord";
+import { useSearchParams } from "wouter";
 import { toast } from "sonner";
 import z from "zod";
 
@@ -50,18 +51,38 @@ export function Installer() {
     },
     validators: {
       onSubmit: installerSchema,
+      onSubmitAsync: async ({ value }) => {
+        if (
+          value.databaseType === "postgresql" &&
+          value.databaseUrl.trim() === ""
+        ) {
+          toast.error("Database URL is required when using postgresql");
+          return {
+            fields: {
+              databaseUrl: "Database URL is required when using postgresql",
+            },
+          };
+        }
+        return undefined;
+      },
     },
     onSubmit: async ({ value }) => {
       if (
         value.databaseType === "postgresql" &&
         value.databaseUrl.trim() === ""
       ) {
+        toast.error("Database URL is required when using postgresql");
         return {
           fields: {
-            databaseUrl: "Database URL is required when using postgresql",
+            databaseUrl: {
+              message: "Database URL is required when using postgresql",
+            },
           },
         };
       }
+
+      const installerPassword = searchParams.get("password") ?? "";
+
       toast.success("Form submitted", {
         description: (
           <pre className="bg-code text-code-foreground mt-2 w-[320px] overflow-x-auto rounded-md p-4">
@@ -72,14 +93,14 @@ export function Installer() {
           content: "flex flex-col gap-2",
         },
       });
-      console.table(value);
     },
   });
 
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const databaseTypeField = useStore(
     form.store,
-    (state) =>
-      (state.values as { databaseType: string | undefined }).databaseType,
+    (state) => state.values.databaseType,
   );
 
   return (
@@ -94,7 +115,8 @@ export function Installer() {
             id="installer-form"
             onSubmit={(e) => {
               e.preventDefault();
-              form.handleSubmit();
+              e.stopPropagation();
+              void form.handleSubmit();
             }}
           >
             <FieldGroup>
