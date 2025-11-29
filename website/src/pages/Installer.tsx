@@ -29,10 +29,13 @@ import { zodSnowflake } from "@/types/discord";
 import { useSearchParams } from "wouter";
 import { toast } from "sonner";
 import z from "zod";
+import { useMutation } from "@tanstack/react-query";
+import { trpc } from "@/lib/trpc";
 
 const installerSchema = z.object({
-  databaseType: z.enum(["pglite", "postgresql"]),
+  databaseType: z.enum(["pglite", "postgres"]),
   databaseUrl: z.string(),
+  websiteUrl: z.url().min(1, "URL is required"),
   botToken: z.string().min(1, "Bot token is required"),
   clientId: zodSnowflake.min(1, "Client ID is required"),
   clientSecret: z.string().min(1, "Client Secret is required"),
@@ -40,10 +43,13 @@ const installerSchema = z.object({
 });
 
 export function Installer() {
+  const installerMutation = useMutation(trpc.installer.set.mutationOptions({}));
+
   const form = useForm({
     defaultValues: {
       databaseType: "pglite",
       databaseUrl: "",
+      websiteUrl: "",
       botToken: "",
       clientId: "",
       clientSecret: "",
@@ -53,7 +59,7 @@ export function Installer() {
       onSubmit: installerSchema,
       onSubmitAsync: async ({ value }) => {
         if (
-          value.databaseType === "postgresql" &&
+          value.databaseType === "postgres" &&
           value.databaseUrl.trim() === ""
         ) {
           toast.error("Database URL is required when using postgresql");
@@ -68,7 +74,7 @@ export function Installer() {
     },
     onSubmit: async ({ value }) => {
       if (
-        value.databaseType === "postgresql" &&
+        value.databaseType === "postgres" &&
         value.databaseUrl.trim() === ""
       ) {
         toast.error("Database URL is required when using postgresql");
@@ -81,9 +87,9 @@ export function Installer() {
         };
       }
 
-      const installerPassword = searchParams.get("password") ?? "";
+      await installerMutation.mutateAsync(value);
 
-      toast.success("Form submitted", {
+      toast("Form submitted", {
         description: (
           <pre className="bg-code text-code-foreground mt-2 w-[320px] overflow-x-auto rounded-md p-4">
             <code>{JSON.stringify(value, null, 2)}</code>
@@ -95,8 +101,6 @@ export function Installer() {
       });
     },
   });
-
-  const [searchParams, setSearchParams] = useSearchParams();
 
   const databaseTypeField = useStore(
     form.store,
@@ -140,7 +144,7 @@ export function Installer() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="pglite">PGLite</SelectItem>
-                          <SelectItem value="postgresql">PostgreSQL</SelectItem>
+                          <SelectItem value="postgres">PostgreSQL</SelectItem>
                         </SelectContent>
                       </Select>
                       {isInvalid && (
@@ -150,7 +154,7 @@ export function Installer() {
                   );
                 }}
               />
-              {databaseTypeField === "postgresql" && (
+              {databaseTypeField === "postgres" && (
                 <form.Field
                   name="databaseUrl"
                   children={(field) => {
@@ -172,13 +176,40 @@ export function Installer() {
                           aria-invalid={isInvalid}
                         />
                         {isInvalid && (
-                          <FieldError errors={field.state.meta.errors} />
+                          <>
+                            {/* @ts-expect-error type error due to empty string check, also I had to add a fragment for this comment */}
+                            <FieldError errors={field.state.meta.errors} />
+                          </>
                         )}
                       </Field>
                     );
                   }}
                 />
               )}
+              <form.Field
+                name="websiteUrl"
+                children={(field) => {
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid;
+
+                  return (
+                    <Field data-invalid={isInvalid}>
+                      <FieldLabel htmlFor={field.name}>URL</FieldLabel>
+                      <Input
+                        id={field.name}
+                        name={field.name}
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        aria-invalid={isInvalid}
+                      />
+                      {isInvalid && (
+                        <FieldError errors={field.state.meta.errors} />
+                      )}
+                    </Field>
+                  );
+                }}
+              />
               <form.Field
                 name="clientId"
                 children={(field) => {

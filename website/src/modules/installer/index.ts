@@ -6,7 +6,7 @@ import installer from "./installer.sql" with { type: "text" };
 
 export class InstallerConfiguration {
   id: number = 0;
-  database_type: "pglite" | "postgres";
+  database_type: string;
   database_url: string;
   url: string;
   registration_enabled: number = 0;
@@ -23,7 +23,7 @@ export class InstallerConfiguration {
   }
 
   constructor(
-    p_database_type: "pglite" | "postgres",
+    p_database_type: string,
     p_database_url: string,
     p_url: string,
     p_registration_enabled: number,

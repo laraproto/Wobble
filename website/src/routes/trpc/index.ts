@@ -1,6 +1,7 @@
 import { installerConfig } from "@/modules/installer";
 import { publicProcedure, router } from "@modules/trpc";
 import { z } from "zod";
+import installerRouter from "./installer";
 
 export const appRouter = router({
   hello: publicProcedure
@@ -19,6 +20,7 @@ export const appRouter = router({
       url: installerConfig?.url,
     };
   }),
+  installer: installerRouter,
 });
 
 export type AppRouter = typeof appRouter;
