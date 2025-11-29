@@ -130,7 +130,12 @@ await Bun.$`zip -r migrations.zip migrations`.cwd(
   path.join(import.meta.dir, "src/modules/db"),
 );
 
-const entrypoints = ["index.ts", "modules/db/migrations.zip"]
+const entrypoints = [
+  "index.ts",
+  "modules/db/migrations.zip",
+  "pglite-wrapper/pglite.data",
+  "pglite-wrapper/pglite-workaround.wasm",
+]
   .map((a) => path.resolve("src", a))
   .filter((dir) => !dir.includes("node_modules"));
 console.log(
@@ -139,6 +144,7 @@ console.log(
 
 const result = await Bun.build({
   entrypoints,
+  root: path.resolve("src"),
   outdir,
   plugins: [plugin],
   minify: true,
@@ -147,8 +153,12 @@ const result = await Bun.build({
   compile: {
     outfile: "wobble",
   },
+  naming: {
+    asset: "[name].[ext]",
+  },
   define: {
     "process.env.NODE_ENV": JSON.stringify("production"),
+    EXECUTABLE: JSON.stringify(true),
   },
   ...cliConfig,
 });

@@ -47,7 +47,7 @@ const installerRouter = router({
       setInstallerConfig(installerGenerated);
 
       try {
-        reconnectDatabase();
+        await reconnectDatabase();
       } catch (err) {
         console.error(err);
         return {

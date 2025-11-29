@@ -6,6 +6,7 @@ import { PGlite } from "@electric-sql/pglite";
 import { installerConfig } from "@modules/installer";
 import * as schema from "./schema";
 import { pgliteDir } from "../config";
+import { createPGlite } from "@/pglite-wrapper";
 
 export let db:
   | ReturnType<typeof drizzle<typeof schema>>
@@ -13,14 +14,15 @@ export let db:
 
 let client: SQL | PGlite | undefined = undefined;
 
-const buildDatabaseClient = () => {
+const buildDatabaseClient = async () => {
   if (!installerConfig?.database_type) {
     console.log("Database Type is not defined in installer configuration");
     return;
   }
   switch (installerConfig.database_type) {
     case "pglite":
-      return new PGlite(pgliteDir);
+      console.log("About to create PGLite instance");
+      return await createPGlite(pgliteDir);
     case "postgres":
       if (!installerConfig?.database_url) {
         console.log("Database URL is not defined in installer configuration");
@@ -36,36 +38,42 @@ const buildDatabaseClient = () => {
 
 // @ts-expect-error This is stupid but rather than use ! or ? everywhere we'll just assume db exists, since after first run it should
 db = (() => {
-  client = buildDatabaseClient();
+  buildDatabaseClient().then((createdClient) => {
+    client = createdClient;
 
-  if (!installerConfig || !client) {
-    console.log("Installer configuration unavailable");
-    return;
-  }
+    if (!installerConfig || !client) {
+      console.log("Installer configuration unavailable");
+      return;
+    }
 
-  switch (installerConfig.database_type) {
-    case "pglite":
-      const pglite = drizzlePgLite({
-        client: client as PGlite,
-        schema,
-        logger: true,
-      });
-      migrate(pglite);
-      return pglite;
-    case "postgres":
-      const postgres = drizzle({ client: client as SQL, schema, logger: true });
-      migrate(postgres);
-      return postgres;
-    default:
-      throw new Error(
-        `Unsupported database type: ${installerConfig.database_type}`,
-      );
-  }
+    switch (installerConfig.database_type) {
+      case "pglite":
+        const pglite = drizzlePgLite({
+          client: client as PGlite,
+          schema,
+          logger: true,
+        });
+        migrate(pglite);
+        return pglite;
+      case "postgres":
+        const postgres = drizzle({
+          client: client as SQL,
+          schema,
+          logger: true,
+        });
+        migrate(postgres);
+        return postgres;
+      default:
+        throw new Error(
+          `Unsupported database type: ${installerConfig.database_type}`,
+        );
+    }
+  });
 })();
 
-export const reconnectDatabase = () => {
+export const reconnectDatabase = async () => {
   try {
-    client = buildDatabaseClient();
+    client = await buildDatabaseClient();
 
     if (client === undefined) {
       console.log("sql client not created");

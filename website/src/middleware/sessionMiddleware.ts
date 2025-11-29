@@ -33,6 +33,13 @@ const sessionMiddleware = createMiddleware<{
     setCookie(c, "session", sessionToken);
   }
 
+  if (authSession === null) {
+    const sessionToken = auth.generateSessionToken();
+    const newSession = await auth.createSession(sessionToken);
+    authSession = newSession;
+    setCookie(c, "session", sessionToken);
+  }
+
   c.set("session", authSession);
   if (user) c.set("user", user);
 
