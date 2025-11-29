@@ -74,17 +74,20 @@ const installerRouter = router({
 
       try {
         console.log("Storing installer config");
-        console.log(
-          updateQuery.get({
-            database_type: installerGenerated.database_type,
-            database_url: installerGenerated.database_url,
-            url: installerGenerated.url,
-            registration_enabled: installerGenerated.canRegister ? 1 : 0,
-            bot_token: installerGenerated.bot_token,
-            client_id: installerGenerated.client_id,
-            client_secret: installerGenerated.client_secret,
-          }),
-        );
+        updateQuery.get({
+          database_type: installerGenerated.database_type,
+          database_url: installerGenerated.database_url,
+          url: installerGenerated.url,
+          registration_enabled: installerGenerated.canRegister ? 1 : 0,
+          bot_token: installerGenerated.bot_token,
+          client_id: installerGenerated.client_id,
+          client_secret: installerGenerated.client_secret,
+        });
+        return {
+          success: true,
+          message: "Panel configured",
+          redirect: "/",
+        };
       } catch (err) {
         console.error(err);
         setInstallerConfig(null);

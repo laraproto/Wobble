@@ -26,7 +26,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { useForm, useStore } from "@tanstack/react-form";
 import { zodSnowflake } from "@/types/discord";
-import { useSearchParams } from "wouter";
+import { useLocation } from "wouter";
 import { toast } from "sonner";
 import z from "zod";
 import { useMutation } from "@tanstack/react-query";
@@ -46,6 +46,7 @@ const installerSchema = z.object({
 
 export function Installer() {
   const installerMutation = useMutation(trpc.installer.set.mutationOptions({}));
+  const [location, navigate] = useLocation();
 
   const form = useForm({
     defaultValues: {
@@ -90,17 +91,15 @@ export function Installer() {
       }
 
       try {
-        await installerMutation.mutateAsync(value);
-        toast("Form submitted", {
-          description: (
-            <pre className="bg-code text-code-foreground mt-2 w-[320px] overflow-x-auto rounded-md p-4">
-              <code>{JSON.stringify(value, null, 2)}</code>
-            </pre>
-          ),
-          classNames: {
-            content: "flex flex-col gap-2",
-          },
-        });
+        const status = await installerMutation.mutateAsync(value);
+        if (status?.success) {
+          toast.success(status.message);
+          if (status.redirect) {
+            navigate(status.redirect);
+          }
+        } else {
+          toast.error(status?.message || "An unknown error occurred");
+        }
       } catch (err) {
         const error = err as TRPCClientError<AppRouter>;
         toast.error(error.data?.code);
