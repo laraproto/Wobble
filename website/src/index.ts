@@ -1,11 +1,6 @@
 import { serve } from "bun";
-import { installerConfig } from "@modules/installer";
 import routes from "@routes/index";
 import index from "./index.html" with { type: "html" };
-import { generateSessionToken } from "./modules/auth";
-
-if (installerConfig === null && !global.installerPassword)
-  global.installerPassword = generateSessionToken();
 
 const server = serve({
   routes: {
@@ -25,5 +20,3 @@ const server = serve({
 });
 
 console.log(`🚀 Server running at ${server.url}`);
-
-console.log(`Generated installer password: ${global.installerPassword}`);
