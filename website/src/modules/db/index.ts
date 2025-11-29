@@ -1,13 +1,11 @@
 import { drizzle } from "drizzle-orm/bun-sql";
 import { drizzle as drizzlePgLite } from "drizzle-orm/pglite";
-import { migrate } from "drizzle-orm/bun-sql/migrator";
-import { migrate as migratePgLite } from "drizzle-orm/pglite/migrator";
+import { migrate } from "./migrator";
 import { SQL } from "bun";
 import { PGlite } from "@electric-sql/pglite";
 import { installerConfig } from "@modules/installer";
 import * as schema from "./schema";
 import { pgliteDir } from "../config";
-import * as path from "node:path";
 
 export let db:
   | ReturnType<typeof drizzle<typeof schema>>
@@ -43,10 +41,17 @@ db = (() => {
 
   switch (installerConfig.database_type) {
     case "pglite":
-      const db = drizzlePgLite({ client: client as PGlite, schema, logger: true });
-      migratePgLite(db, { migrationsFolder: path.join(import.meta.dir, "")})
+      const pglite = drizzlePgLite({
+        client: client as PGlite,
+        schema,
+        logger: true,
+      });
+      migrate(pglite);
+      return pglite;
     case "postgres":
-      return drizzle({ client: client as SQL, schema, logger: true });
+      const postgres = drizzle({ client: client as SQL, schema, logger: true });
+      migrate(postgres);
+      return postgres;
     default:
       throw new Error(
         `Unsupported database type: ${installerConfig.database_type}`,

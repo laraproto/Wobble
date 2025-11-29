@@ -126,11 +126,15 @@ if (existsSync(outdir)) {
 
 const start = performance.now();
 
-const entrypoints = [...new Bun.Glob("**.html").scanSync("src")]
+await Bun.$`zip -r migrations.zip migrations`.cwd(
+  path.join(import.meta.dir, "src/modules/db"),
+);
+
+const entrypoints = ["index.ts", "modules/db/migrations.zip"]
   .map((a) => path.resolve("src", a))
   .filter((dir) => !dir.includes("node_modules"));
 console.log(
-  `📄 Found ${entrypoints.length} HTML ${entrypoints.length === 1 ? "file" : "files"} to process\n`,
+  `📄 Found ${entrypoints.length} ${entrypoints.length === 1 ? "file" : "files"} to process\n`,
 );
 
 const result = await Bun.build({
@@ -138,8 +142,11 @@ const result = await Bun.build({
   outdir,
   plugins: [plugin],
   minify: true,
-  target: "browser",
+  target: "node",
   sourcemap: "linked",
+  compile: {
+    outfile: "wobble",
+  },
   define: {
     "process.env.NODE_ENV": JSON.stringify("production"),
   },

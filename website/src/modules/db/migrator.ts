@@ -4,19 +4,42 @@ import type { PgliteDatabase } from "drizzle-orm/pglite";
 import { DATA_DIR } from "@modules/config";
 import { installerConfig } from "@modules/installer";
 import * as path from "node:path";
+import * as fs from "node:fs";
+import unzipper from "unzipper";
 
 import { migrate as migrateBun } from "drizzle-orm/bun-sql/migrator";
 import { migrate as migratePgLite } from "drizzle-orm/pglite/migrator";
 
 declare const EXECUTABLE: boolean;
 
+console.log(Bun.embeddedFiles);
+
 export async function migrate<TSchema extends Record<string, unknown>>(
   db: BunSQLDatabase<TSchema> | PgliteDatabase<TSchema>,
 ) {
   let migrationsFolder: string;
   if (EXECUTABLE) {
-    console.log("Network download migration functionality not made yet");
+    let zipBlob: Blob | null = null;
+    for (const file of Bun.embeddedFiles) {
+      if ((file as File).name === "migrations.zip") {
+        zipBlob = file as Blob;
+        break;
+      }
+    }
+
+    if (!zipBlob) {
+      throw new Error("Migrations zip file not found in embedded files");
+    }
+
+    const zip = await unzipper.Open.buffer(
+      Buffer.from(await zipBlob.arrayBuffer()),
+    );
+
     migrationsFolder = path.join(DATA_DIR, "migrations");
+
+    fs.mkdirSync(migrationsFolder, { recursive: true });
+
+    await zip.extract({ path: DATA_DIR });
   } else {
     migrationsFolder = path.join(import.meta.dir, "migrations");
   }
