@@ -13,6 +13,7 @@
     "db:studio": "bun drizzle-kit studio"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.940.0",
     "@electric-sql/pglite": "^0.3.14",
     "@hono/trpc-server": "^0.4.0",
     "@oslojs/crypto": "^1.0.1",
