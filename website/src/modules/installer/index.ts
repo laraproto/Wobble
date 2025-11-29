@@ -77,5 +77,6 @@ const dataTableQuery = configDB
 export let installerConfig = dataTableQuery.get();
 
 export const setInstallerConfig = (config: InstallerConfiguration | null) => {
+  console.log(config);
   installerConfig = config;
 };

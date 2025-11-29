@@ -31,6 +31,8 @@ import { toast } from "sonner";
 import z from "zod";
 import { useMutation } from "@tanstack/react-query";
 import { trpc } from "@/lib/trpc";
+import type { TRPCClientError } from "@trpc/client";
+import type { AppRouter } from "@/routes/trpc";
 
 const installerSchema = z.object({
   databaseType: z.enum(["pglite", "postgres"]),
@@ -87,18 +89,22 @@ export function Installer() {
         };
       }
 
-      await installerMutation.mutateAsync(value);
-
-      toast("Form submitted", {
-        description: (
-          <pre className="bg-code text-code-foreground mt-2 w-[320px] overflow-x-auto rounded-md p-4">
-            <code>{JSON.stringify(value, null, 2)}</code>
-          </pre>
-        ),
-        classNames: {
-          content: "flex flex-col gap-2",
-        },
-      });
+      try {
+        await installerMutation.mutateAsync(value);
+        toast("Form submitted", {
+          description: (
+            <pre className="bg-code text-code-foreground mt-2 w-[320px] overflow-x-auto rounded-md p-4">
+              <code>{JSON.stringify(value, null, 2)}</code>
+            </pre>
+          ),
+          classNames: {
+            content: "flex flex-col gap-2",
+          },
+        });
+      } catch (err) {
+        const error = err as TRPCClientError<AppRouter>;
+        toast.error(error.data?.code);
+      }
     },
   });
 

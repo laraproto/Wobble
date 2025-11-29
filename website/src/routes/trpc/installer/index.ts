@@ -4,7 +4,6 @@ import { zodSnowflake } from "@/types/discord";
 import { db, reconnectDatabase, schema } from "@modules/db";
 import {
   configDB,
-  installerConfig,
   InstallerConfiguration,
   setInstallerConfig,
 } from "@modules/installer";
@@ -42,7 +41,7 @@ const installerRouter = router({
       );
 
       const updateQuery = configDB.query(
-        "UPDATE data SET database_type = $database_type, database_url = $database_url, url = $url, registration_enabled = $registration_enabled, bot_token = $bot_token, client_id = $client_id, client_secret = $client_secret;",
+        "INSERT INTO data(database_type,database_url,url,registration_enabled,bot_token,client_id,client_secret) VALUES ($database_type,$database_url,$url,$registration_enabled,$bot_token,$client_id,$client_secret);",
       );
 
       setInstallerConfig(installerGenerated);
@@ -74,15 +73,18 @@ const installerRouter = router({
       }
 
       try {
-        await updateQuery.get({
-          database_type: installerGenerated.database_type,
-          database_url: installerGenerated.database_url,
-          url: installerGenerated.url,
-          registration_enabled: installerGenerated.canRegister ? 1 : 0,
-          bot_token: installerGenerated.bot_token,
-          client_id: installerGenerated.client_id,
-          client_secret: installerGenerated.client_secret,
-        });
+        console.log("Storing installer config");
+        console.log(
+          updateQuery.get({
+            database_type: installerGenerated.database_type,
+            database_url: installerGenerated.database_url,
+            url: installerGenerated.url,
+            registration_enabled: installerGenerated.canRegister ? 1 : 0,
+            bot_token: installerGenerated.bot_token,
+            client_id: installerGenerated.client_id,
+            client_secret: installerGenerated.client_secret,
+          }),
+        );
       } catch (err) {
         console.error(err);
         setInstallerConfig(null);
