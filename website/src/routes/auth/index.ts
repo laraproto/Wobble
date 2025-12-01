@@ -22,6 +22,10 @@ authApp.get("/redirect", async (c) => {
     return c.text("Session not found", 400);
   }
 
+  if (c.get("user")) {
+    return c.redirect("/dashboard", 307);
+  }
+
   const state = arctic.generateState();
   const url = discord.createAuthorizationURL(state, null, discordScopes);
   setCookie(c, "discord_state", state, {
