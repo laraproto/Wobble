@@ -11,8 +11,8 @@ export const appRouter = router({
       }),
     )
     .output(z.string())
-    .query(({ input }) => {
-      return `Hello, ${input?.name ?? "world"}!`;
+    .query(({ input, ctx }) => {
+      return `Hello, ${input?.name ?? "world"}! Your session is ${JSON.stringify(ctx.session)}`;
     }),
   configuration: publicProcedure.query(() => {
     return {

@@ -1,8 +1,12 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { installerConfig } from "@modules/installer";
+import type { Session, UserMinimal } from "../db/schema";
 
-interface TRPCContext {}
+interface TRPCContext {
+  session: Session;
+  user: UserMinimal;
+}
 
 interface Meta {}
 

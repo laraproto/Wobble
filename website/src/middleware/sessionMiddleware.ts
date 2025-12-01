@@ -11,7 +11,7 @@ const sessionMiddleware = createMiddleware<{
   };
 }>(async (c, next) => {
   if (!db) {
-    //console.log("[sessionHandler] Installer Wizard not completed");
+    console.log("[sessionHandler] Installer Wizard not completed");
     await next();
     return;
   }
@@ -30,18 +30,30 @@ const sessionMiddleware = createMiddleware<{
     const sessionToken = auth.generateSessionToken();
     const newSession = await auth.createSession(sessionToken);
     authSession = newSession;
-    setCookie(c, "session", sessionToken);
+    setCookie(c, "session", sessionToken, {
+      expires: new Date(Date.now() + auth.DAY_IN_MS),
+    });
   }
 
   if (authSession === null) {
     const sessionToken = auth.generateSessionToken();
     const newSession = await auth.createSession(sessionToken);
     authSession = newSession;
-    setCookie(c, "session", sessionToken);
+    setCookie(c, "session", sessionToken, {
+      expires: new Date(Date.now() + auth.DAY_IN_MS),
+    });
   }
 
   c.set("session", authSession);
   if (user) c.set("user", user);
+
+  const expiresSeconds = authSession.expiresAt.getTime() - Date.now();
+  if (authCookie && user && expiresSeconds < auth.DAY_IN_MS * 7) {
+    const newExpiresAt = new Date(Date.now() + auth.DAY_IN_MS * 30);
+    setCookie(c, "session", authCookie, {
+      expires: newExpiresAt,
+    });
+  }
 
   await next();
   return;

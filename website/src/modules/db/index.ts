@@ -36,8 +36,7 @@ const buildDatabaseClient = async () => {
   }
 };
 
-// @ts-expect-error This is stupid but rather than use ! or ? everywhere we'll just assume db exists, since after first run it should
-db = (() => {
+(() => {
   buildDatabaseClient().then((createdClient) => {
     client = createdClient;
 
@@ -54,7 +53,8 @@ db = (() => {
           logger: true,
         });
         migrate(pglite);
-        return pglite;
+        db = pglite;
+        break;
       case "postgres":
         const postgres = drizzle({
           client: client as SQL,
@@ -62,7 +62,8 @@ db = (() => {
           logger: true,
         });
         migrate(postgres);
-        return postgres;
+        db = postgres;
+        break;
       default:
         throw new Error(
           `Unsupported database type: ${installerConfig.database_type}`,

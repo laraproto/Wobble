@@ -12,8 +12,6 @@ import { migrate as migratePgLite } from "drizzle-orm/pglite/migrator";
 
 declare const EXECUTABLE: boolean;
 
-console.log(Bun.embeddedFiles);
-
 export async function migrate<TSchema extends Record<string, unknown>>(
   db: BunSQLDatabase<TSchema> | PgliteDatabase<TSchema>,
 ) {

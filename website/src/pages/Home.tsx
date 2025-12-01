@@ -36,7 +36,7 @@ export function Home() {
               ) : (
                 <>
                   <Button asChild>
-                    <a href="/api/auth">Dashboard</a>
+                    <a href="/api/auth/redirect">Dashboard</a>
                   </Button>
                   {!configurationQuery.data?.installed && (
                     <Button asChild>

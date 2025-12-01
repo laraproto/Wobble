@@ -3,7 +3,7 @@ import { sha256 } from "@oslojs/crypto/sha2";
 import { encodeBase64url, encodeHexLowerCase } from "@oslojs/encoding";
 import { db, schema } from "@modules/db";
 
-const DAY_IN_MS = 1000 * 60 * 60 * 24;
+export const DAY_IN_MS = 1000 * 60 * 60 * 24;
 
 export function generateSessionToken() {
   const bytes = crypto.getRandomValues(new Uint8Array(18));
