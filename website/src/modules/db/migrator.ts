@@ -1,8 +1,8 @@
 import type { BunSQLDatabase } from "drizzle-orm/bun-sql";
 import type { PgliteDatabase } from "drizzle-orm/pglite";
 
-import { DATA_DIR } from "@modules/config";
-import { installerConfig } from "@modules/installer";
+import { DATA_DIR } from "#modules/config";
+import { installerConfig } from "#modules/installer";
 import * as path from "node:path";
 import * as fs from "node:fs";
 import unzipper from "unzipper";

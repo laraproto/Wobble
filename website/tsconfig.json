@@ -23,13 +23,12 @@
 
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "@types/*": ["./src/types/*"],
-      "@pages/*": ["./src/pages/*"],
-      "@modules/*": ["./src/modules/*"],
-      "@lib/*": ["./src/lib/*"],
-      "@routes/*": ["./src/routes/*"],
-      "@middleware/*": ["./src/middleware/*"]
+      "#/*": ["./src/*"],
+      "#pages/*": ["./src/pages/*"],
+      "#modules/*": ["./src/modules/*"],
+      "#lib/*": ["./src/lib/*"],
+      "#routes/*": ["./src/routes/*"],
+      "#middleware/*": ["./src/middleware/*"]
     },
 
     // Some stricter flags (disabled by default)

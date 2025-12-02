@@ -1,6 +1,6 @@
 import { Database } from "bun:sqlite";
-import { DATA_DIR } from "@modules/config";
-import { generateSessionToken } from "@modules/auth";
+import { DATA_DIR } from "#modules/config";
+import { generateSessionToken } from "#modules/auth";
 // @ts-expect-error for some reason it's giving ts 2307 despite the module declaration
 import installer from "./installer.sql" with { type: "text" };
 

@@ -1,13 +1,13 @@
-import { installerProcedure, router } from "@modules/trpc";
+import { installerProcedure, router } from "#modules/trpc";
 import { z } from "zod";
-import { zodSnowflake } from "@/types/discord";
-import { db, reconnectDatabase, schema } from "@modules/db";
+import { zodSnowflake } from "#/types/discord";
+import { db, reconnectDatabase, schema } from "#modules/db";
 import {
   configDB,
   InstallerConfiguration,
   setInstallerConfig,
-} from "@modules/installer";
-import { migrate } from "@/modules/db/migrator";
+} from "#modules/installer";
+import { migrate } from "#modules/db/migrator";
 
 const installerRouter = router({
   set: installerProcedure

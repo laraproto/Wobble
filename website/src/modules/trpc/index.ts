@@ -1,6 +1,6 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
-import { installerConfig } from "@modules/installer";
+import { installerConfig } from "#modules/installer";
 import type { Session, UserMinimal } from "../db/schema";
 
 interface TRPCContext {
@@ -21,6 +21,18 @@ export const installerProcedure = publicProcedure.use(async (opts) => {
   const { ctx } = opts;
   if (installerConfig) {
     throw new TRPCError({ code: "FORBIDDEN" });
+  }
+
+  return opts.next({
+    ctx,
+  });
+});
+
+export const authedProcedure = publicProcedure.use(async (opts) => {
+  const { ctx } = opts;
+
+  if (!ctx.user) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
   }
 
   return opts.next({

@@ -3,10 +3,10 @@ import { drizzle as drizzlePgLite } from "drizzle-orm/pglite";
 import { migrate } from "./migrator";
 import { SQL } from "bun";
 import { PGlite } from "@electric-sql/pglite";
-import { installerConfig } from "@modules/installer";
+import { installerConfig } from "#modules/installer";
 import * as schema from "./schema";
 import { pgliteDir } from "../config";
-import { createPGlite } from "@/pglite-wrapper";
+import { createPGlite } from "#/pglite-wrapper";
 
 export let db:
   | ReturnType<typeof drizzle<typeof schema>>

@@ -1,7 +1,8 @@
-import { installerConfig } from "@/modules/installer";
-import { publicProcedure, router } from "@modules/trpc";
+import { installerConfig } from "#modules/installer";
+import { publicProcedure, router } from "#modules/trpc";
 import { z } from "zod";
 import installerRouter from "./installer";
+import authedRouter from "./authed";
 
 export const appRouter = router({
   hello: publicProcedure
@@ -21,6 +22,7 @@ export const appRouter = router({
     };
   }),
   installer: installerRouter,
+  authed: authedRouter,
 });
 
 export type AppRouter = typeof appRouter;

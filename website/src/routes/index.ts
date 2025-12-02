@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { trpcServer } from "@hono/trpc-server";
-import sessionMiddleware from "@/middleware/sessionMiddleware";
-import { appRouter } from "@routes/trpc/index";
+import sessionMiddleware from "#middleware/sessionMiddleware";
+import { appRouter } from "#routes/trpc/index";
 import authApp from "./auth";
 
 const app = new Hono().basePath("/api");

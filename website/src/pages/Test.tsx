@@ -4,8 +4,8 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { APITester } from "@/APITester";
+} from "#/components/ui/card";
+import { APITester } from "#/APITester";
 
 export function Test() {
   return (

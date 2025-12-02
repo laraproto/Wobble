@@ -5,7 +5,7 @@ import {
   CardHeader,
   CardContent,
   CardFooter,
-} from "@/components/ui/card";
+} from "#/components/ui/card";
 import {
   Field,
   FieldContent,
@@ -13,26 +13,26 @@ import {
   FieldError,
   FieldGroup,
   FieldLabel,
-} from "@/components/ui/field";
+} from "#/components/ui/field";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
+} from "#/components/ui/select";
+import { Button } from "#/components/ui/button";
+import { Checkbox } from "#/components/ui/checkbox";
+import { Input } from "#/components/ui/input";
 import { useForm, useStore } from "@tanstack/react-form";
-import { zodSnowflake } from "@/types/discord";
+import { zodSnowflake } from "#/types/discord";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
 import z from "zod";
 import { useMutation } from "@tanstack/react-query";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "#/lib/trpc";
 import type { TRPCClientError } from "@trpc/client";
-import type { AppRouter } from "@/routes/trpc";
+import type { AppRouter } from "#/routes/trpc";
 
 const installerSchema = z.object({
   databaseType: z.enum(["pglite", "postgres"]),

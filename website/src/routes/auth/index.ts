@@ -1,12 +1,12 @@
 import { Hono } from "hono";
-import sessionMiddleware from "@/middleware/sessionMiddleware";
+import sessionMiddleware from "#middleware/sessionMiddleware";
 import * as arctic from "arctic";
-import { discord, discordScopes } from "@/modules/oauth";
+import { discord, discordScopes } from "#modules/oauth";
 import type { APIUser } from "discord-api-types/v10";
 import { setCookie, getCookie } from "hono/cookie";
 import ky from "ky";
-import { db, schema } from "@/modules/db";
-import { setSessionUser } from "@/modules/auth";
+import { db, schema } from "#modules/db";
+import { setSessionUser } from "#modules/auth";
 
 type Variables = {
   session: schema.Session | null;

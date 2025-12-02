@@ -1,7 +1,7 @@
 import "./index.css";
 
-import { Toaster } from "@/components/ui/sonner";
-import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "#/components/ui/sonner";
+import { ThemeProvider } from "#/components/theme-provider";
 import { Route, Switch } from "wouter";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/trpc";
@@ -10,6 +10,7 @@ import { Home } from "./pages/Home";
 import { Test } from "./pages/Test";
 import { NotFound } from "./pages/NotFound";
 import { Installer } from "./pages/Installer";
+import { Dashboard } from "./pages/Dashboard";
 
 export function App() {
   return (
@@ -19,6 +20,7 @@ export function App() {
           <Switch>
             <Route path="/test" component={Test} />
             <Route path="/installer" component={Installer} />
+            <Route path="/dashboard" component={Dashboard} nest></Route>
             <Route path="/" component={Home} />
 
             <Route component={NotFound} />
