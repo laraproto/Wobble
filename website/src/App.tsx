@@ -20,8 +20,9 @@ export function App() {
           <Switch>
             <Route path="/test" component={Test} />
             <Route path="/installer" component={Installer} />
-            <Route path="/dashboard" component={Dashboard} nest></Route>
+
             <Route path="/" component={Home} />
+            <Route path="/dashboard" component={Dashboard} />
 
             <Route component={NotFound} />
           </Switch>
