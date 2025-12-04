@@ -85,6 +85,8 @@ export function DashboardProvider({
 }
 
 export function DashboardSidebar() {
+  const dashboardContext = useDashboard();
+
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
@@ -122,7 +124,7 @@ export function DashboardSidebar() {
                   <Avatar>
                     <AvatarFallback>UwU</AvatarFallback>
                   </Avatar>
-                  <span>Username</span>
+                  <span>{dashboardContext.user.displayName}</span>
                   <ChevronUp className="ml-auto" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
@@ -131,12 +133,6 @@ export function DashboardSidebar() {
                 className="w-[--radix-popper-anchor-width]"
                 align="start"
               >
-                <DropdownMenuItem>
-                  <span>Account</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <span>Billing</span>
-                </DropdownMenuItem>
                 <DropdownMenuItem>
                   <span>Sign out</span>
                 </DropdownMenuItem>
