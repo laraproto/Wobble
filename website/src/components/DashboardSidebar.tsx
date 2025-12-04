@@ -26,7 +26,12 @@ import {
   useMemo,
   useState,
 } from "react";
+
+import { useMutation } from "@tanstack/react-query";
+import { queryClient, trpc } from "#lib/trpc";
+
 import type { UserMinimal } from "#/modules/db/schema";
+import { navigate } from "wouter/use-browser-location";
 
 export interface DashboardSidebarContextProps {
   selectedServerId?: string;
@@ -87,6 +92,10 @@ export function DashboardProvider({
 export function DashboardSidebar() {
   const dashboardContext = useDashboard();
 
+  const logoutMutation = useMutation(
+    trpc.authed.currentUser.logout.mutationOptions(),
+  );
+
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
@@ -122,9 +131,18 @@ export function DashboardSidebar() {
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton>
                   <Avatar>
+                    {dashboardContext.user.avatarHash && (
+                      <AvatarImage
+                        src={`https://cdn.discordapp.com/avatars/${dashboardContext.user.discordId}/${dashboardContext.user.avatarHash}.png?size=128`}
+                        alt={dashboardContext.user.username}
+                      />
+                    )}
                     <AvatarFallback>UwU</AvatarFallback>
                   </Avatar>
-                  <span>{dashboardContext.user.displayName}</span>
+                  <span>
+                    {dashboardContext.user.displayName ??
+                      dashboardContext.user.username}
+                  </span>
                   <ChevronUp className="ml-auto" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
@@ -133,7 +151,15 @@ export function DashboardSidebar() {
                 className="w-[--radix-popper-anchor-width]"
                 align="start"
               >
-                <DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    logoutMutation.mutate();
+                    queryClient.invalidateQueries();
+                    navigate("/", {
+                      replace: true,
+                    });
+                  }}
+                >
                   <span>Sign out</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>

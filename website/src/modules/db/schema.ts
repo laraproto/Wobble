@@ -6,6 +6,7 @@ import {
   bigint,
   boolean,
   uuid,
+  jsonb,
 } from "drizzle-orm/pg-core";
 import { relations, sql } from "drizzle-orm";
 import { z } from "zod";
@@ -22,6 +23,7 @@ export const user = pgTable("users", {
   displayName: varchar("display_name", { length: 128 }).notNull(),
   discordId: varchar("discord_id", { length: 256 }).notNull().unique(),
   totpSecret: varchar("totp_secret", { length: 64 }),
+  avatarHash: varchar("avatar_hash", { length: 256 }),
   flags: bigint({ mode: "bigint" })
     .notNull()
     .default(sql`1::bigint`),
@@ -36,6 +38,20 @@ export const session = pgTable("session", {
     mode: "date",
   }).notNull(),
   totpVerified: boolean("totp_verified").notNull().default(false),
+  ...timeData,
+});
+
+export const guild = pgTable("guilds", {
+  uuid: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name", { length: 256 }).notNull(),
+  guildId: varchar("guild_id", { length: 256 }).notNull().unique(),
+  iconHash: varchar("icon_hash", { length: 256 }),
+  ownerId: varchar("owner_id", { length: 256 })
+    .references(() => user.discordId, { onDelete: "cascade" })
+    .notNull(),
+  settings: jsonb("settings")
+    .notNull()
+    .default(sql`'{}'::jsonb`),
   ...timeData,
 });
 

@@ -74,12 +74,14 @@ authApp.get("/callback", async (c) => {
         discordId: discordUser.id,
         username: discordUser.username,
         displayName: discordUser.global_name ?? discordUser.username,
+        avatarHash: discordUser.avatar,
       })
       .onConflictDoUpdate({
         target: schema.user.discordId,
         set: {
           username: discordUser.username,
           displayName: discordUser.global_name ?? discordUser.username,
+          avatarHash: discordUser.avatar,
         },
       })
       .returning();
