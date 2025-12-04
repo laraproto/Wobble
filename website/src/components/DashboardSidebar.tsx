@@ -19,6 +19,70 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "#/components/ui/avatar";
 
 import { ChevronDown, ChevronUp } from "lucide-react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
+import type { UserMinimal } from "#/modules/db/schema";
+
+export interface DashboardSidebarContextProps {
+  selectedServerId?: string;
+  setSelectedServerId: (id: string) => void;
+  user: UserMinimal;
+}
+
+export const DashboardSidebarContext =
+  createContext<DashboardSidebarContextProps | null>(null);
+
+function useDashboard() {
+  const context = useContext(DashboardSidebarContext);
+  if (!context) {
+    throw new Error("useDashboard must be used within a DashboardProvider.");
+  }
+
+  return context;
+}
+
+export function DashboardProvider({
+  children,
+  user,
+  selectedServerId: selectedServerIdProp,
+}: {
+  children: React.ReactNode;
+  user: UserMinimal;
+  selectedServerId?: string;
+}) {
+  const [_selectedServerId, _setSelectedServerId] = useState<
+    string | undefined
+  >();
+
+  const selectedServerId = selectedServerIdProp ?? _selectedServerId;
+
+  const setSelectedServerId = useCallback(
+    (id: string) => {
+      _setSelectedServerId(id);
+    },
+    [selectedServerId],
+  );
+
+  const contextValue = useMemo<DashboardSidebarContextProps>(
+    () => ({
+      selectedServerId,
+      setSelectedServerId,
+      user,
+    }),
+    [selectedServerId, user],
+  );
+
+  return (
+    <DashboardSidebarContext.Provider value={contextValue}>
+      {children}
+    </DashboardSidebarContext.Provider>
+  );
+}
 
 export function DashboardSidebar() {
   return (
