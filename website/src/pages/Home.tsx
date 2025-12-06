@@ -8,13 +8,7 @@ import { toast } from "sonner";
 export function Home() {
   const configurationQuery = useQuery(trpc.configuration.queryOptions());
   const helloQuery = useQuery(trpc.hello.queryOptions({}));
-  const userQuery = useQuery(
-    trpc.authed.currentUser.me.queryOptions(undefined, {
-      retry: (failureCount, error) => {
-        return failureCount < 3 && error.data?.code !== "UNAUTHORIZED";
-      },
-    }),
-  );
+  const userQuery = useQuery(trpc.authed.currentUser.me.queryOptions());
 
   if (helloQuery.isFetched) {
     toast(helloQuery.data);

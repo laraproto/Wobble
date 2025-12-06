@@ -137,7 +137,9 @@ export function DashboardSidebar() {
                         alt={dashboardContext.user.username}
                       />
                     )}
-                    <AvatarFallback>UwU</AvatarFallback>
+                    <AvatarFallback>
+                      {dashboardContext.user.username}
+                    </AvatarFallback>
                   </Avatar>
                   <span>
                     {dashboardContext.user.displayName ??
@@ -152,9 +154,9 @@ export function DashboardSidebar() {
                 align="start"
               >
                 <DropdownMenuItem
-                  onClick={() => {
-                    logoutMutation.mutate();
-                    queryClient.invalidateQueries();
+                  onClick={async () => {
+                    await logoutMutation.mutateAsync();
+                    await queryClient.invalidateQueries();
                     navigate("/", {
                       replace: true,
                     });

@@ -66,8 +66,6 @@ authApp.get("/callback", async (c) => {
       },
     }).json<APIUser>();
 
-    console.log(discordUser.username);
-
     const user = await db
       .insert(schema.user)
       .values({
