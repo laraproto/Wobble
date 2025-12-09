@@ -126,9 +126,11 @@ if (existsSync(outdir)) {
 
 const start = performance.now();
 
-await Bun.$`zip -r migrations.zip migrations`.cwd(
-  path.join(import.meta.dir, "src/modules/db"),
-);
+if (process.platform !== "win32") {
+  await Bun.$`zip -r migrations.zip migrations`.cwd(
+    path.join(import.meta.dir, "src/modules/db"),
+  );
+}
 
 const entrypoints = [
   "index.ts",

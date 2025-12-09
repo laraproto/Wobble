@@ -12,6 +12,8 @@ const isUndefinedOrEmpty = (
   return value;
 };
 
+export const PORT = Number(isUndefinedOrEmpty(Bun.env.PORT, "3000"));
+
 export const NODE_ENV = isUndefinedOrEmpty(Bun.env.NODE_ENV, "development");
 
 export const DATA_DIR = (() => {

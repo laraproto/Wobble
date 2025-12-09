@@ -6,16 +6,10 @@ declare module "bun" {
   }
 }
 
-declare module "*.sql" {
-  const content: string;
-  export default content;
-}
-
 declare global {
   interface BigInt {
     toJSON(): string;
   }
-  var installerPassword: string;
 }
 
 export {};
