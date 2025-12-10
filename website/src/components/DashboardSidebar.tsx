@@ -18,7 +18,7 @@ import {
 
 import { Avatar, AvatarFallback, AvatarImage } from "#/components/ui/avatar";
 
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, PlusCircle } from "lucide-react";
 import {
   createContext,
   useCallback,
@@ -114,6 +114,13 @@ export function DashboardSidebar() {
               >
                 <DropdownMenuItem>
                   <span>Lara's Sillies Server</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <a href="/api/guild/invite">
+                    <span className="flex flex-row items-center">
+                      <PlusCircle className="ml-auto mr-1" /> Add to Server
+                    </span>
+                  </a>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
