@@ -1,13 +1,16 @@
 import { installerProcedure, router } from "#modules/trpc";
 import { z } from "zod";
 import { zodSnowflake } from "#/types/discord";
-import { db, reconnectDatabase, schema } from "#modules/db";
+import { db, reconnectDatabase } from "#modules/db";
 import {
   configDB,
   InstallerConfiguration,
   setInstallerConfig,
 } from "#modules/installer";
 import { migrate } from "#modules/db/migrator";
+import { startBotChildProcess } from "#/modules/bot";
+import { serverUrl } from "#/index";
+import { setupOAuthModules } from "#/modules/oauth";
 
 const installerRouter = router({
   set: installerProcedure
@@ -69,6 +72,40 @@ const installerRouter = router({
         return {
           success: false,
           message: `Failed to migrate the database: ${(err as Error).message}`,
+        };
+      }
+
+      try {
+        console.log("Setting up OAuth modules");
+
+        setupOAuthModules();
+      } catch (err) {
+        console.error(err);
+        return {
+          success: false,
+          message: `Failed to setup OAuth modules: ${(err as Error).message}`,
+        };
+      }
+
+      try {
+        console.log("Attempting to initialise discord bot");
+
+        if (!serverUrl) {
+          throw new Error(
+            "Server somehow doesn't know it's URL, this shouldn't happen!",
+          );
+        }
+
+        const botStarted = await startBotChildProcess(serverUrl, Bun.main);
+
+        if (!botStarted) {
+          throw new Error("Failed to start bot process");
+        }
+      } catch (err) {
+        console.error(err);
+        return {
+          success: false,
+          message: `Failed to setup OAuth modules: ${(err as Error).message}`,
         };
       }
 

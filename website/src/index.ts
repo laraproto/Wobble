@@ -3,7 +3,7 @@ import index from "./index.html" with { type: "html" };
 import { PORT } from "./modules/config";
 import { installerConfig } from "./modules/installer";
 
-declare const EXECUTABLE: boolean;
+export let serverUrl: URL | null = null;
 
 const apiInit = async () => {
   const routes = await import("#routes/index");
@@ -28,34 +28,17 @@ const apiInit = async () => {
 
   console.log(`🚀 Server running at ${server.url}`);
 
+  serverUrl = server.url;
+
   if (!installerConfig) {
     return;
   }
 
-  if (EXECUTABLE) {
-    const proc = Bun.spawn([process.execPath, "bot"], {
-      env: {
-        ...process.env,
-        BOT_TOKEN: installerConfig.bot_token,
-        URL: server.url.toString(),
-      },
-      stdout: "inherit",
-      stderr: "inherit",
-    });
-    proc.unref();
-  } else {
-    console.log("About to create discord bot");
-    const proc = Bun.spawn([process.execPath, import.meta.path, "bot"], {
-      env: {
-        ...process.env,
-        BOT_TOKEN: installerConfig.bot_token,
-        URL: server.url.toString(),
-      },
-      stdout: "inherit",
-      stderr: "inherit",
-    });
-    proc.unref();
-  }
+  const { startBotChildProcess } = await import("#modules/bot");
+
+  const botStarted = await startBotChildProcess(server.url, Bun.main);
+
+  if (botStarted) console.log("Process fork made");
 };
 
 switch (process.argv[2] === "bot") {

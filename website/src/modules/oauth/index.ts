@@ -8,8 +8,16 @@ const redirectUri = new URL(
 // we might do something with emails eventually
 export const discordScopes = ["identify", "email"];
 
-export const discord = new arctic.Discord(
-  installerConfig?.client_id!,
-  installerConfig?.client_secret!,
-  redirectUri.href,
-);
+export let discord: arctic.Discord | null = null;
+
+export const setupOAuthModules = async () => {
+  discord = new arctic.Discord(
+    installerConfig?.client_id!,
+    installerConfig?.client_secret!,
+    redirectUri.href,
+  );
+};
+
+if (installerConfig) {
+  setupOAuthModules();
+}
