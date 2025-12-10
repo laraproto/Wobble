@@ -26,6 +26,10 @@ authApp.get("/redirect", async (c) => {
     return c.redirect("/dashboard", 307);
   }
 
+  if (!discord) {
+    return c.text("Complete installer first", 400);
+  }
+
   const state = arctic.generateState();
   const url = discord.createAuthorizationURL(state, null, discordScopes);
   setCookie(c, "discord_state", state, {
@@ -45,6 +49,10 @@ authApp.get("/callback", async (c) => {
 
   if (!c.get("session")) {
     return c.text("Session not found", 400);
+  }
+
+  if (!discord) {
+    return c.text("Complete installer first", 400);
   }
 
   if (
