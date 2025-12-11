@@ -4,9 +4,9 @@ import * as arctic from "arctic";
 import { discord, discordScopes } from "#modules/oauth";
 import type { APIUser } from "discord-api-types/v10";
 import { setCookie, getCookie } from "hono/cookie";
-import ky from "ky";
 import { db, schema } from "#modules/db";
 import { setSessionUser } from "#modules/auth";
+import { discordKy } from "#/kyInstance";
 
 type Variables = {
   session: schema.Session | null;
@@ -67,8 +67,9 @@ authApp.get("/callback", async (c) => {
   try {
     const tokens = await discord.validateAuthorizationCode(code, null);
     const accessToken = tokens.accessToken();
+    const refreshToken = tokens.refreshToken();
 
-    const discordUser = await ky("https://discord.com/api/users/@me", {
+    const discordUser = await discordKy("users/@me", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
@@ -81,6 +82,11 @@ authApp.get("/callback", async (c) => {
         username: discordUser.username,
         displayName: discordUser.global_name ?? discordUser.username,
         avatarHash: discordUser.avatar,
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+        tokenExpiresAt: new Date(
+          Date.now() + tokens.accessTokenExpiresInSeconds() * 1000,
+        ),
       })
       .onConflictDoUpdate({
         target: schema.user.discordId,
@@ -88,6 +94,11 @@ authApp.get("/callback", async (c) => {
           username: discordUser.username,
           displayName: discordUser.global_name ?? discordUser.username,
           avatarHash: discordUser.avatar,
+          accessToken: accessToken,
+          refreshToken: refreshToken,
+          tokenExpiresAt: new Date(
+            Date.now() + tokens.accessTokenExpiresInSeconds() * 1000,
+          ),
         },
       })
       .returning();

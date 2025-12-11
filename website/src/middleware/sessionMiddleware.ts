@@ -1,13 +1,16 @@
 import { createMiddleware } from "hono/factory";
 import { getCookie, setCookie } from "hono/cookie";
 import * as auth from "#modules/auth";
-import type { UserMinimal, Session } from "#modules/db/schema";
-import { db } from "#modules/db";
+import type { UserMinimal, Session, User } from "#modules/db/schema";
+import { db, schema } from "#modules/db";
+import { eq } from "drizzle-orm";
+import { discord } from "#/modules/oauth";
 
 const sessionMiddleware = createMiddleware<{
   Variables: {
     session: Session | null;
     user: UserMinimal | null;
+    userUnredacted: User | null;
   };
 }>(async (c, next) => {
   if (!db) {
@@ -41,6 +44,7 @@ const sessionMiddleware = createMiddleware<{
     authSession = newSession;
     setCookie(c, "session", sessionToken, {
       expires: new Date(Date.now() + auth.DAY_IN_MS),
+      sameSite: "Strict",
     });
   }
 
@@ -52,7 +56,42 @@ const sessionMiddleware = createMiddleware<{
     const newExpiresAt = new Date(Date.now() + auth.DAY_IN_MS * 30);
     setCookie(c, "session", authCookie, {
       expires: newExpiresAt,
+      sameSite: "Strict",
     });
+  }
+
+  if (authCookie && user) {
+    const userUnredacted = await db.query.user.findFirst({
+      where: (userTable, { eq }) => eq(userTable.uuid, user.uuid),
+    });
+
+    if (!userUnredacted) {
+      await next();
+      return;
+    }
+
+    c.set("userUnredacted", userUnredacted);
+
+    if (userUnredacted.tokenExpiresAt.getTime() < Date.now()) {
+      if (!discord) {
+        console.log("[sessionMiddleware] Discord OAuth not configured");
+        await next();
+        return;
+      }
+
+      const tokens = await discord.refreshAccessToken(
+        userUnredacted.refreshToken,
+      );
+
+      await db
+        .update(schema.user)
+        .set({
+          accessToken: tokens.accessToken(),
+          refreshToken: tokens.refreshToken(),
+          tokenExpiresAt: tokens.accessTokenExpiresAt(),
+        })
+        .where(eq(schema.user.uuid, userUnredacted.uuid));
+    }
   }
 
   await next();

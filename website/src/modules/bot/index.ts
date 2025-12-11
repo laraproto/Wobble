@@ -7,6 +7,11 @@ export const startBotChildProcess = async (url: URL, basePath: string) => {
     return false;
   }
 
+  if (global.botGlobal) {
+    console.log("Bot running, time to kill");
+    global.botGlobal.kill(9);
+  }
+
   let proc: Bun.Subprocess<"ignore", "inherit", "inherit"> | null = null;
   console.log("About to create discord bot");
   if (EXECUTABLE) {
@@ -36,6 +41,8 @@ export const startBotChildProcess = async (url: URL, basePath: string) => {
   if (proc.exitCode) {
     return false;
   }
+
+  global.botGlobal = proc;
 
   return true;
 };

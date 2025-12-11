@@ -33,10 +33,13 @@ import { queryClient, trpc } from "#lib/trpc";
 import type { UserMinimal } from "#/modules/db/schema";
 import { navigate } from "wouter/use-browser-location";
 
+import type { APIPartialGuild } from "discord-api-types/v10";
+
 export interface DashboardSidebarContextProps {
   selectedServerId?: string;
   setSelectedServerId: (id: string) => void;
   user: UserMinimal;
+  guilds: APIPartialGuild[];
 }
 
 export const DashboardSidebarContext =
@@ -55,10 +58,12 @@ export function DashboardProvider({
   children,
   user,
   selectedServerId: selectedServerIdProp,
+  guilds,
 }: {
   children: React.ReactNode;
   user: UserMinimal;
   selectedServerId?: string;
+  guilds: APIPartialGuild[];
 }) {
   const [_selectedServerId, _setSelectedServerId] = useState<
     string | undefined
@@ -78,6 +83,7 @@ export function DashboardProvider({
       selectedServerId,
       setSelectedServerId,
       user,
+      guilds,
     }),
     [selectedServerId, user],
   );
@@ -112,9 +118,20 @@ export function DashboardSidebar() {
                 className="w-[--radix-popper-anchor-width]"
                 sideOffset={4}
               >
-                <DropdownMenuItem>
-                  <span>Lara's Sillies Server</span>
-                </DropdownMenuItem>
+                {dashboardContext.guilds.map((guild) => (
+                  <DropdownMenuItem>
+                    <Avatar className="w-6 h-6">
+                      {guild.icon && (
+                        <AvatarImage
+                          src={`https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.webp?size=32`}
+                          alt={guild.name}
+                        />
+                      )}
+                      <AvatarFallback>{guild.name}</AvatarFallback>
+                    </Avatar>
+                    <span>{guild.name}</span>
+                  </DropdownMenuItem>
+                ))}
                 <DropdownMenuItem>
                   <a href="/api/guild/invite">
                     <span className="flex flex-row items-center">
@@ -140,7 +157,7 @@ export function DashboardSidebar() {
                   <Avatar>
                     {dashboardContext.user.avatarHash && (
                       <AvatarImage
-                        src={`https://cdn.discordapp.com/avatars/${dashboardContext.user.discordId}/${dashboardContext.user.avatarHash}.png?size=128`}
+                        src={`https://cdn.discordapp.com/avatars/${dashboardContext.user.discordId}/${dashboardContext.user.avatarHash}.webp?size=128`}
                         alt={dashboardContext.user.username}
                       />
                     )}

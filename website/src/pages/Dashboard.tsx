@@ -8,24 +8,17 @@ import { trpc } from "#lib/trpc";
 export function Dashboard() {
   const [location, navigate] = useLocation();
 
-  const userQuery = useQuery(
-    trpc.authed.currentUser.me.queryOptions(undefined, {
-      retry: (failureCount, error) => {
-        if (error.data?.code === "UNAUTHORIZED") {
-          navigate("/");
-        }
-        return failureCount < 3 && error.data?.code !== "UNAUTHORIZED";
-      },
-    }),
-  );
+  const userQuery = useQuery(trpc.authed.currentUser.me.queryOptions());
 
-  if (userQuery.isLoading) {
+  const guildQuery = useQuery(trpc.authed.currentUser.getGuilds.queryOptions());
+
+  if (userQuery.isLoading || guildQuery.isLoading) {
     return <div>Loading</div>;
   }
 
   return (
     <Switch>
-      <DashboardProvider user={userQuery.data!}>
+      <DashboardProvider user={userQuery.data!} guilds={guildQuery.data!}>
         <DashboardLayout>
           <div className="ml-2 mt-2">
             <Route>

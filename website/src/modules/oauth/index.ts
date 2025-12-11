@@ -6,7 +6,7 @@ const redirectUri = new URL(
   installerConfig?.url ?? "http://localhost:3000",
 );
 // we might do something with emails eventually
-export const discordScopes = ["identify", "email"];
+export const discordScopes = ["identify", "email", "guilds"];
 
 export let discord: arctic.Discord | null = null;
 

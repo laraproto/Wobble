@@ -10,6 +10,7 @@ declare global {
   interface BigInt {
     toJSON(): string;
   }
+  var botGlobal: Bun.Subprocess<"ignore", "inherit", "inherit"> | null;
 }
 
 export {};

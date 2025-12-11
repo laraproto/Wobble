@@ -24,6 +24,9 @@ export const user = pgTable("users", {
   discordId: varchar("discord_id", { length: 256 }).notNull().unique(),
   totpSecret: varchar("totp_secret", { length: 64 }),
   avatarHash: varchar("avatar_hash", { length: 256 }),
+  accessToken: varchar("access_token", { length: 64 }).notNull(),
+  refreshToken: varchar("refresh_token", { length: 64 }).notNull(),
+  tokenExpiresAt: timestamp("token_expires_at").notNull(),
   flags: bigint({ mode: "bigint" })
     .notNull()
     .default(sql`1::bigint`),
@@ -74,6 +77,8 @@ export const sessionInsertSchema = createInsertSchema(session);
 
 export const userSelectMinimal = userSelectSchema.omit({
   totpSecret: true,
+  accessToken: true,
+  refreshToken: true,
 });
 
 export const userSelectMinimalWithSessions = z.object({

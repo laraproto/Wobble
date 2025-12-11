@@ -32,6 +32,7 @@ app.use(
     createContext: (_opts, c) => ({
       session: c.get("session"),
       user: c.get("user"),
+      userUnredacted: c.get("userUnredacted"),
     }),
   }),
 );
