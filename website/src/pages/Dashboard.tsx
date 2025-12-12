@@ -1,12 +1,13 @@
 import { DashboardLayout } from "#/components/DashboardLayout";
 import { DashboardProvider } from "#/components/DashboardSidebar";
-import { Route, Switch, useLocation } from "wouter";
+import { Route, Switch, useLocation, useSearchParams } from "wouter";
 
 import { useQuery } from "@tanstack/react-query";
 import { trpc } from "#lib/trpc";
 
 export function Dashboard() {
   const [location, navigate] = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const userQuery = useQuery(trpc.authed.currentUser.me.queryOptions());
 
@@ -16,9 +17,15 @@ export function Dashboard() {
     return <div>Loading</div>;
   }
 
+  const guildUuid = searchParams.get("uuid");
+
   return (
     <Switch>
-      <DashboardProvider user={userQuery.data!} guilds={guildQuery.data!}>
+      <DashboardProvider
+        user={userQuery.data!}
+        selectedServerId={guildUuid || undefined}
+        guilds={guildQuery.data!}
+      >
         <DashboardLayout>
           <div className="ml-2 mt-2">
             <Route>

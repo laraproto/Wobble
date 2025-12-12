@@ -126,10 +126,13 @@ if (existsSync(outdir)) {
 
 const start = performance.now();
 
-if (process.platform !== "win32") {
+if (Bun.which("zip")) {
+  console.log("Creating migrations zip file");
   await Bun.$`zip -r migrations.zip migrations`.cwd(
     path.join(import.meta.dir, "src/modules/db"),
   );
+} else {
+  console.log("Couldn't create zip file, because zip was not found");
 }
 
 const entrypoints = [

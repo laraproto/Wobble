@@ -44,6 +44,8 @@ authApp.get("/redirect", async (c) => {
 authApp.get("/callback", async (c) => {
   const code = c.req.query("code");
   const state = c.req.query("state");
+  const permissions = c.req.query("permissions");
+  const guildId = c.req.query("guild_id");
 
   const storedState = getCookie(c, "discord_state");
 
@@ -55,6 +57,8 @@ authApp.get("/callback", async (c) => {
     return c.text("Complete installer first", 400);
   }
 
+  console.log(code, storedState, state);
+
   if (
     code === undefined ||
     storedState === undefined ||
@@ -62,6 +66,20 @@ authApp.get("/callback", async (c) => {
   ) {
     console.error("Invalid state or missing code");
     return c.text("Authentication failed", 400);
+  }
+
+  if (permissions && guildId && c.get("user")) {
+    console.log("Bot invite done");
+    const getGuild = await db.query.guild.findFirst({
+      where: (guild, { eq }) => eq(guild.guildId, guildId),
+    });
+
+    if (!getGuild) {
+      console.log("Bot invite happened but guild was still missed");
+      return c.text("Guild miss somehow, bot might be offline?", 400);
+    }
+
+    return c.redirect(`/dashboard?uuid=${getGuild.uuid}`);
   }
 
   try {

@@ -47,17 +47,20 @@ export async function validateSessionToken(token: string) {
   });
 
   if (!result) {
-    return { session: null, user: null };
+    return { session: null, user: null, userUnredacted: null };
   }
   const session = result;
 
-  let userQuery;
+  let userQuery: schema.User | null = null;
 
   if (session.userId !== null) {
-    userQuery = await db.query.user.findFirst({
+    const makeQuery = await db.query.user.findFirst({
       //@ts-expect-error typescript is being drunk, i am null checking userId but it still complains
       where: (userTable, { eq }) => eq(userTable.uuid, session.userId),
     });
+    if (makeQuery) {
+      userQuery = makeQuery;
+    }
   }
 
   const user = schema.userSelectMinimal.safeParse(userQuery).data ?? null;
@@ -65,7 +68,7 @@ export async function validateSessionToken(token: string) {
   const sessionExpired = Date.now() >= session.expiresAt.getTime();
   if (sessionExpired) {
     await db.delete(schema.session).where(eq(schema.session.id, session.id));
-    return { session: null, user: null };
+    return { session: null, user: null, userUnredacted: null };
   }
 
   const renewSession =
@@ -80,7 +83,7 @@ export async function validateSessionToken(token: string) {
       .where(eq(schema.session.id, session.id));
   }
 
-  return { session, user };
+  return { session, user, userUnredacted: userQuery };
 }
 
 export type SessionValidationResult = Awaited<

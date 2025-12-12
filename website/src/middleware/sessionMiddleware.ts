@@ -23,12 +23,14 @@ const sessionMiddleware = createMiddleware<{
 
   let authSession: Session | null = null;
   let user: UserMinimal | null = null;
+  let userUnredacted: User | null = null;
 
   if (authCookie !== undefined) {
     const validation = await auth.validateSessionToken(authCookie);
 
     authSession = validation.session;
     user = validation.user;
+    userUnredacted = validation.userUnredacted;
   } else {
     const sessionToken = auth.generateSessionToken();
     const newSession = await auth.createSession(sessionToken);
@@ -60,16 +62,7 @@ const sessionMiddleware = createMiddleware<{
     });
   }
 
-  if (authCookie && user) {
-    const userUnredacted = await db.query.user.findFirst({
-      where: (userTable, { eq }) => eq(userTable.uuid, user.uuid),
-    });
-
-    if (!userUnredacted) {
-      await next();
-      return;
-    }
-
+  if (authCookie && user && userUnredacted) {
     c.set("userUnredacted", userUnredacted);
 
     if (userUnredacted.tokenExpiresAt.getTime() < Date.now()) {

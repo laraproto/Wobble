@@ -7,6 +7,8 @@ interface TRPCContext {
   session: Session;
   user: UserMinimal;
   userUnredacted: User;
+  setStateCookie: (state: string) => void;
+  getStateCookie: () => string | undefined;
 }
 
 interface Meta {}

@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { setCookie, getCookie } from "hono/cookie";
 import { trpcServer } from "@hono/trpc-server";
 import sessionMiddleware from "#middleware/sessionMiddleware";
 import { appRouter } from "#routes/trpc/index";
@@ -33,6 +34,14 @@ app.use(
       session: c.get("session"),
       user: c.get("user"),
       userUnredacted: c.get("userUnredacted"),
+      setStateCookie: (state: string) =>
+        setCookie(c, "discord_state", state, {
+          httpOnly: true,
+          secure: true,
+          path: "/",
+          maxAge: 60 * 10,
+        }),
+      getStateCookie: () => getCookie(c, "discord_state"),
     }),
   }),
 );

@@ -32,6 +32,7 @@ import { queryClient, trpc } from "#lib/trpc";
 
 import type { UserMinimal } from "#/modules/db/schema";
 import { navigate } from "wouter/use-browser-location";
+import { toast } from "sonner";
 
 import type { APIPartialGuild } from "discord-api-types/v10";
 
@@ -39,7 +40,18 @@ export interface DashboardSidebarContextProps {
   selectedServerId?: string;
   setSelectedServerId: (id: string) => void;
   user: UserMinimal;
-  guilds: APIPartialGuild[];
+  guilds: GuildProperty[];
+}
+
+interface GuildProperty {
+  id: string;
+  name: string;
+  permissions: number;
+  icon: string | null;
+  banner: string | null | undefined;
+  owner: boolean;
+  inviteable: boolean;
+  uuid: string | null;
 }
 
 export const DashboardSidebarContext =
@@ -63,7 +75,7 @@ export function DashboardProvider({
   children: React.ReactNode;
   user: UserMinimal;
   selectedServerId?: string;
-  guilds: APIPartialGuild[];
+  guilds: GuildProperty[];
 }) {
   const [_selectedServerId, _setSelectedServerId] = useState<
     string | undefined
@@ -102,6 +114,8 @@ export function DashboardSidebar() {
     trpc.authed.currentUser.logout.mutationOptions(),
   );
 
+  const inviteMutation = useMutation(trpc.authed.makeInvite.mutationOptions());
+
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
@@ -119,7 +133,26 @@ export function DashboardSidebar() {
                 sideOffset={4}
               >
                 {dashboardContext.guilds.map((guild) => (
-                  <DropdownMenuItem>
+                  <DropdownMenuItem
+                    key={guild.id}
+                    onClick={async () => {
+                      if (!guild.inviteable && guild.uuid) {
+                        dashboardContext.setSelectedServerId(guild.uuid);
+                        return;
+                      }
+
+                      const result = await inviteMutation.mutateAsync(guild.id);
+                      if (result.success && result.url) {
+                        window.location.href = result.url;
+                      } else {
+                        toast.error(
+                          `Failed to create invite link: ${
+                            result.message ?? "Unknown error"
+                          }`,
+                        );
+                      }
+                    }}
+                  >
                     <Avatar className="w-6 h-6">
                       {guild.icon && (
                         <AvatarImage
@@ -130,15 +163,11 @@ export function DashboardSidebar() {
                       <AvatarFallback>{guild.name}</AvatarFallback>
                     </Avatar>
                     <span>{guild.name}</span>
+                    {guild.inviteable && (
+                      <PlusCircle className="ml-auto mr-1" />
+                    )}
                   </DropdownMenuItem>
                 ))}
-                <DropdownMenuItem>
-                  <a href="/api/guild/invite">
-                    <span className="flex flex-row items-center">
-                      <PlusCircle className="ml-auto mr-1" /> Add to Server
-                    </span>
-                  </a>
-                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </SidebarMenuItem>

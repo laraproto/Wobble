@@ -1,25 +1,35 @@
 import { authedProcedure, router } from "#modules/trpc";
-import { z } from "zod";
 import * as arctic from "arctic";
 import { discord, discordScopes } from "#modules/oauth";
 import currentUserRouter from "./currentUser";
+import { zodSnowflake } from "#/types/discord";
 
 const authedRouter = router({
   currentUser: currentUserRouter,
-  makeInvite: authedProcedure.query(({ ctx }) => {
+  makeInvite: authedProcedure.input(zodSnowflake).mutation(({ ctx, input }) => {
     if (!discord) {
       return { success: false, message: "Complete installer first" };
     }
 
-    const state = arctic.generateState();
-    const url = discord.createAuthorizationURL(state, null, [
-      ...discordScopes,
-      "bot",
-    ]);
+    try {
+      const state = arctic.generateState();
+      const url = discord.createAuthorizationURL(state, null, [
+        ...discordScopes,
+        "bot",
+      ]);
 
-    /* Incomplete no way to store state right now as cookies are not exposed to trpc,
-    will get back to working on it later
-    */
+      ctx.setStateCookie(state);
+
+      // Temporary, will fine tune permissions, eventually
+      url.searchParams.append("permissions", "8");
+
+      url.searchParams.append("guild_id", input);
+
+      return { success: true, url: url.href };
+    } catch (err) {
+      console.error("Error creating invite link:", err);
+      return { success: false, message: "Failed to create invite link" };
+    }
   }),
 });
 
