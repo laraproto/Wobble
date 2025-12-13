@@ -3,6 +3,7 @@ import { publicProcedure, router } from "#modules/trpc";
 import { z } from "zod";
 import installerRouter from "./installer";
 import authedRouter from "./authed";
+import botRouter from "./bot";
 
 export const appRouter = router({
   hello: publicProcedure
@@ -23,6 +24,7 @@ export const appRouter = router({
   }),
   installer: installerRouter,
   authed: authedRouter,
+  bot: botRouter,
 });
 
 export type AppRouter = typeof appRouter;
