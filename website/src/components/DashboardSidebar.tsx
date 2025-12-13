@@ -7,6 +7,8 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
+  SidebarGroupLabel,
+  SidebarGroupContent,
 } from "#/components/ui/sidebar";
 
 import {
@@ -33,32 +35,21 @@ import { queryClient, trpc } from "#lib/trpc";
 import type { UserMinimal } from "#/modules/db/schema";
 import { navigate } from "wouter/use-browser-location";
 import { toast } from "sonner";
-
-import type { APIPartialGuild } from "discord-api-types/v10";
+import { type GuildProperty } from "#/types/discord";
+import { Link } from "wouter";
 
 export interface DashboardSidebarContextProps {
   selectedServerId?: string;
-  setSelectedServerId: (id: string) => void;
+  setSelectedServerId: (id: string | undefined) => void;
   guild?: GuildProperty;
   user: UserMinimal;
   guilds: GuildProperty[];
 }
 
-interface GuildProperty {
-  id: string;
-  name: string;
-  permissions: number;
-  icon: string | null;
-  banner: string | null | undefined;
-  owner: boolean;
-  inviteable: boolean;
-  uuid: string | null;
-}
-
 export const DashboardSidebarContext =
   createContext<DashboardSidebarContextProps | null>(null);
 
-function useDashboard() {
+export function useDashboard() {
   const context = useContext(DashboardSidebarContext);
   if (!context) {
     throw new Error("useDashboard must be used within a DashboardProvider.");
@@ -131,7 +122,20 @@ export function DashboardSidebar() {
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton>
                   {dashboardContext.guild ? (
-                    <span>what</span>
+                    <>
+                      <Avatar className="w-8 h-8">
+                        {dashboardContext.guild.icon && (
+                          <AvatarImage
+                            src={`https://cdn.discordapp.com/icons/${dashboardContext.guild.id}/${dashboardContext.guild.icon}.webp?size=128`}
+                            alt={dashboardContext.guild.name}
+                          />
+                        )}
+                        <AvatarFallback>
+                          {dashboardContext.guild.name}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span>{dashboardContext.guild.name}</span>
+                    </>
                   ) : (
                     <span>Select server</span>
                   )}
@@ -183,9 +187,26 @@ export function DashboardSidebar() {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
+
       <SidebarContent>
-        <SidebarGroup />
-        <SidebarGroup />
+        {dashboardContext.guild && (
+          <>
+            <SidebarGroup>
+              <SidebarGroupLabel>General</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link href={`/${dashboardContext.guild.uuid}/overview`}>
+                        Overview
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </>
+        )}
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>

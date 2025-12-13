@@ -49,12 +49,11 @@ export const guild = pgTable("guilds", {
   name: varchar("name", { length: 256 }).notNull(),
   guildId: varchar("guild_id", { length: 256 }).notNull().unique(),
   iconHash: varchar("icon_hash", { length: 256 }),
+  bannnerHash: varchar("banner_hash", { length: 256 }),
   ownerId: varchar("owner_id", { length: 256 })
     .references(() => user.discordId, { onDelete: "cascade" })
     .notNull(),
-  settings: jsonb("settings")
-    .notNull()
-    .default(sql`'{}'::jsonb`),
+  settings: jsonb("settings").notNull().default({}).$type<{}>(),
   ...timeData,
 });
 
@@ -74,6 +73,9 @@ export const userInsertSchema = createInsertSchema(user);
 
 export const sessionSelectSchema = createSelectSchema(session);
 export const sessionInsertSchema = createInsertSchema(session);
+
+export const guildSelectSchema = createSelectSchema(guild);
+export const guildInsertSchema = createInsertSchema(guild);
 
 export const userSelectMinimal = userSelectSchema.omit({
   totpSecret: true,
@@ -101,3 +103,6 @@ export type UserWithSessions = z.infer<typeof userSelectWithSessions>;
 export type Session = z.infer<typeof sessionSelectSchema>;
 export type SessionInsert = z.infer<typeof sessionInsertSchema>;
 export type UserInsert = z.infer<typeof userInsertSchema>;
+
+export type Guild = z.infer<typeof guildSelectSchema>;
+export type GuildInsert = z.infer<typeof guildInsertSchema>;

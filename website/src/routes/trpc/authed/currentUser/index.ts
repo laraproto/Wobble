@@ -51,6 +51,7 @@ const currentUserRouter = router({
       ) {
         // Might actually be faster to do a sql query for each instead of loop in a loop
         const localisedGuild = addedGuilds.find((g) => g.guildId === guild.id);
+
         guilds.push({
           id: guild.id,
           name: guild.name,

@@ -1,9 +1,10 @@
 import { DashboardLayout } from "#/components/DashboardLayout";
 import { DashboardProvider } from "#/components/DashboardSidebar";
-import { Route, Switch, useLocation, useSearchParams } from "wouter";
+import { Route, useParams, useLocation, useSearchParams } from "wouter";
 
 import { useQuery } from "@tanstack/react-query";
 import { trpc } from "#lib/trpc";
+import { GuildBase } from "./dashboardPages/GuildBase";
 
 export function Dashboard() {
   const [location, navigate] = useLocation();
@@ -20,20 +21,20 @@ export function Dashboard() {
   const guildUuid = searchParams.get("uuid");
 
   return (
-    <Switch>
-      <DashboardProvider
-        user={userQuery.data!}
-        selectedServerId={guildUuid || undefined}
-        guilds={guildQuery.data!}
-      >
-        <DashboardLayout>
-          <div className="ml-2 mt-2">
-            <Route>
-              <h1 className="text-3xl font-bold">Dashboard</h1>
-            </Route>
-          </div>
-        </DashboardLayout>
-      </DashboardProvider>
-    </Switch>
+    <DashboardProvider
+      user={userQuery.data!}
+      selectedServerId={guildUuid || undefined}
+      guilds={guildQuery.data!}
+    >
+      <DashboardLayout>
+        <div className="ml-2 mt-2">
+          <Route path="/:guild" component={GuildBase} nest />
+
+          <Route path="/">
+            <h1 className="text-3xl font-bold">Dashboard</h1>
+          </Route>
+        </div>
+      </DashboardLayout>
+    </DashboardProvider>
   );
 }
