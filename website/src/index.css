@@ -2,7 +2,7 @@
 
 @layer base {
   :root {
-    @apply font-sans;
+    font-family: "Inter", sans-serif;
   }
 
   body {

@@ -27,7 +27,7 @@ export function Dashboard() {
       guilds={guildQuery.data!}
     >
       <DashboardLayout>
-        <div className="ml-2 mt-2">
+        <div>
           <Route path="/:guild" component={GuildBase} nest />
 
           <Route path="/">

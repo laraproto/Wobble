@@ -79,7 +79,7 @@ authApp.get("/callback", async (c) => {
       return c.text("Guild miss somehow, bot might be offline?", 400);
     }
 
-    return c.redirect(`/dashboard?uuid=${getGuild.uuid}`);
+    return c.redirect(`/dashboard/${getGuild.uuid}/overview`);
   }
 
   try {

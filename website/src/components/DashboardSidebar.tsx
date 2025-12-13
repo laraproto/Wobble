@@ -20,7 +20,12 @@ import {
 
 import { Avatar, AvatarFallback, AvatarImage } from "#/components/ui/avatar";
 
-import { ChevronDown, ChevronUp, PlusCircle } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  PlusCircle,
+  LayoutDashboard,
+} from "lucide-react";
 import {
   createContext,
   useCallback,
@@ -80,7 +85,7 @@ export function DashboardProvider({
   );
 
   const setSelectedServerId = useCallback(
-    (id: string) => {
+    (id: string | undefined) => {
       _setSelectedServerId(id);
     },
     [selectedServerId],
@@ -151,7 +156,7 @@ export function DashboardSidebar() {
                     key={guild.id}
                     onClick={async () => {
                       if (!guild.inviteable && guild.uuid) {
-                        dashboardContext.setSelectedServerId(guild.uuid);
+                        navigate(`/dashboard/${guild.uuid}/overview`);
                         return;
                       }
 
@@ -198,6 +203,7 @@ export function DashboardSidebar() {
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild>
                       <Link href={`/${dashboardContext.guild.uuid}/overview`}>
+                        <LayoutDashboard />
                         Overview
                       </Link>
                     </SidebarMenuButton>
