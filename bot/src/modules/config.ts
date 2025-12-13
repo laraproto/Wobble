@@ -27,3 +27,13 @@ export const BOT_TOKEN = (() => {
 
   return token;
 })();
+
+export const BOT_SESSION = (() => {
+  const token = isUndefinedOrEmpty(Bun.env.BOT_SESSION);
+
+  if (!token) {
+    throw new Error("BOT_SESSION environment variable is not defined");
+  }
+
+  return token;
+})();

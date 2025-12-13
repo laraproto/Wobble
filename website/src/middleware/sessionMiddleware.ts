@@ -5,12 +5,14 @@ import type { UserMinimal, Session, User } from "#modules/db/schema";
 import { db, schema } from "#modules/db";
 import { eq } from "drizzle-orm";
 import { discord } from "#/modules/oauth";
+import { botSessionKey } from "#/modules/bot";
 
 const sessionMiddleware = createMiddleware<{
   Variables: {
     session: Session | null;
     user: UserMinimal | null;
     userUnredacted: User | null;
+    isBot: boolean | null;
   };
 }>(async (c, next) => {
   if (!db) {
@@ -19,11 +21,20 @@ const sessionMiddleware = createMiddleware<{
     return;
   }
 
+  const authHeader = c.req.header("Authorization");
   const authCookie = getCookie(c, "session");
 
   let authSession: Session | null = null;
   let user: UserMinimal | null = null;
   let userUnredacted: User | null = null;
+
+  if (authHeader && authHeader === botSessionKey) {
+    c.set("isBot", true);
+    await next();
+    return;
+  } else {
+    c.set("isBot", false);
+  }
 
   if (authCookie !== undefined) {
     const validation = await auth.validateSessionToken(authCookie);

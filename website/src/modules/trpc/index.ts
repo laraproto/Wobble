@@ -7,6 +7,7 @@ interface TRPCContext {
   session: Session;
   user: UserMinimal;
   userUnredacted: User;
+  isBot: boolean;
   setStateCookie: (state: string) => void;
   getStateCookie: () => string | undefined;
 }
@@ -35,6 +36,18 @@ export const authedProcedure = publicProcedure.use(async (opts) => {
   const { ctx } = opts;
 
   if (!ctx.user) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+
+  return opts.next({
+    ctx,
+  });
+});
+
+export const botProcedure = publicProcedure.use(async (opts) => {
+  const { ctx } = opts;
+
+  if (!ctx.isBot) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
 

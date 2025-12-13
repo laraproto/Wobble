@@ -26,8 +26,10 @@
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false,
     "paths": {
-      "#modules/*": ["./src/modules/*"],
-      "#commands/*": ["./src/commands/*"]
+      "#botModules/*": ["./src/modules/*"],
+      "#commands/*": ["./src/commands/*"],
+      "#modules/*": ["../website/src/modules/*"],
+      "#routes/*": ["../website/src/routes/*"]
     }
   }
 }

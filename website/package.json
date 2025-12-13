@@ -6,6 +6,14 @@
   "exports": {
     "./trpc": "./src/routes/trpc/index.ts"
   },
+  "imports": {
+    "#/*": "./src/*",
+    "#pages/*": "./src/pages/*",
+    "#modules/*": "./src/modules/*",
+    "#lib/*": "./src/lib/*",
+    "#routes/*": "./src/routes/*",
+    "#middleware/*": "./src/middleware/*"
+  },
   "scripts": {
     "dev": "bun --hot --define EXECUTABLE=false src/index.ts",
     "start": "NODE_ENV=production bun --define EXECUTABLE=false src/index.ts",

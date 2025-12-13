@@ -39,6 +39,7 @@ import type { APIPartialGuild } from "discord-api-types/v10";
 export interface DashboardSidebarContextProps {
   selectedServerId?: string;
   setSelectedServerId: (id: string) => void;
+  guild?: GuildProperty;
   user: UserMinimal;
   guilds: GuildProperty[];
 }
@@ -83,6 +84,10 @@ export function DashboardProvider({
 
   const selectedServerId = selectedServerIdProp ?? _selectedServerId;
 
+  const selectedGuild: GuildProperty | undefined = guilds.find(
+    (guild) => guild.uuid === selectedServerId,
+  );
+
   const setSelectedServerId = useCallback(
     (id: string) => {
       _setSelectedServerId(id);
@@ -96,6 +101,7 @@ export function DashboardProvider({
       setSelectedServerId,
       user,
       guilds,
+      guild: selectedGuild,
     }),
     [selectedServerId, user],
   );
@@ -124,7 +130,11 @@ export function DashboardSidebar() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton>
-                  <span>Select server</span>
+                  {dashboardContext.guild ? (
+                    <span>what</span>
+                  ) : (
+                    <span>Select server</span>
+                  )}
                   <ChevronDown className="ml-auto" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>

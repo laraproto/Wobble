@@ -13,7 +13,7 @@ export const appRouter = router({
     )
     .output(z.string())
     .query(({ input, ctx }) => {
-      return `Hello, ${input?.name ?? "world"}! Your session is ${JSON.stringify(ctx.session)}`;
+      return `Hello, ${input?.name ?? "world"}! ${!ctx.isBot ? `Your session is ${JSON.stringify(ctx.session)}` : `You are a bot user`}`;
     }),
   configuration: publicProcedure.query(() => {
     return {

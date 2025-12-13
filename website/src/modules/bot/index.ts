@@ -1,6 +1,9 @@
 import { installerConfig } from "#modules/installer";
+import { generateSessionToken } from "../auth";
 
 declare const EXECUTABLE: boolean;
+
+export const botSessionKey = generateSessionToken();
 
 export const startBotChildProcess = async (url: URL, basePath: string) => {
   if (!installerConfig) {
@@ -20,6 +23,7 @@ export const startBotChildProcess = async (url: URL, basePath: string) => {
         ...process.env,
         BOT_TOKEN: installerConfig.bot_token,
         URL: url.toString(),
+        BOT_SESSION: botSessionKey,
       },
       stdout: "inherit",
       stderr: "inherit",
@@ -30,6 +34,7 @@ export const startBotChildProcess = async (url: URL, basePath: string) => {
         ...process.env,
         BOT_TOKEN: installerConfig.bot_token,
         URL: url.toString(),
+        BOT_SESSION: botSessionKey,
       },
       stdout: "inherit",
       stderr: "inherit",

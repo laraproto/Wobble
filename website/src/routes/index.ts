@@ -31,6 +31,7 @@ app.use(
     endpoint: "/api/trpc",
     router: appRouter,
     createContext: (_opts, c) => ({
+      isBot: c.get("isBot"),
       session: c.get("session"),
       user: c.get("user"),
       userUnredacted: c.get("userUnredacted"),
