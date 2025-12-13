@@ -1,7 +1,9 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { installerConfig } from "#modules/installer";
+import { db } from "../db";
 import type { Session, UserMinimal, User } from "../db/schema";
+import z from "zod";
 
 interface TRPCContext {
   session: Session;
@@ -55,3 +57,33 @@ export const botProcedure = publicProcedure.use(async (opts) => {
     ctx,
   });
 });
+
+export const guildProcedure = authedProcedure
+  .input(
+    z.object({
+      guildId: z.string(),
+    }),
+  )
+  .use(async (opts) => {
+    const { ctx, input } = opts;
+
+    // eventually people will be allowed to get given panel access but right now it's only the owner
+    const guildQuery = await db.query.guild.findFirst({
+      where: (guild, { eq }) => eq(guild.guildId, input.guildId),
+    });
+
+    if (!guildQuery) {
+      throw new TRPCError({ code: "NOT_FOUND" });
+    }
+
+    if (guildQuery.ownerId !== ctx.user.discordId) {
+      throw new TRPCError({ code: "FORBIDDEN" });
+    }
+
+    return opts.next({
+      ctx: {
+        ...ctx,
+        guild: guildQuery,
+      },
+    });
+  });

@@ -1,6 +1,7 @@
 import { BOT_TOKEN } from "#botModules/config";
 import { Client, Events, GatewayIntentBits, Guild } from "discord.js";
 import trpc from "#botModules/trpc";
+import "#botModules/ws";
 
 if (import.meta.main) {
   console.log("You are not supposed to run this");
@@ -56,6 +57,6 @@ const addGuild = async (guild: Guild) => {
     name: guild.name,
     ownerId: guild.ownerId,
     iconHash: guild.icon ?? null,
-    bannnerHash: guild.banner ?? null,
+    bannerHash: guild.banner ?? null,
   });
 };

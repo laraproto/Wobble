@@ -2,10 +2,12 @@ import { authedProcedure, router } from "#modules/trpc";
 import * as arctic from "arctic";
 import { discord, discordScopes } from "#modules/oauth";
 import currentUserRouter from "./currentUser";
+import guildRouter from "./guild";
 import { zodSnowflake } from "#/types/discord";
 
 const authedRouter = router({
   currentUser: currentUserRouter,
+  guild: guildRouter,
   makeInvite: authedProcedure.input(zodSnowflake).mutation(({ ctx, input }) => {
     if (!discord) {
       return { success: false, message: "Complete installer first" };

@@ -4,6 +4,8 @@ import { trpcServer } from "@hono/trpc-server";
 import sessionMiddleware from "#middleware/sessionMiddleware";
 import { appRouter } from "#routes/trpc/index";
 import authApp from "./auth";
+import { upgradeWebSocket } from "hono/bun";
+import type { ServerWebSocket } from "bun";
 
 const app = new Hono().basePath("/api");
 
@@ -21,6 +23,26 @@ app.all("/hello/:name", (c) => {
     method: c.req.method,
   });
 });
+
+app.use(
+  "/ws",
+  sessionMiddleware,
+  upgradeWebSocket((c) => {
+    return {
+      onOpen(_event, ws) {
+        const bunWs = ws.raw as ServerWebSocket;
+        if (!c.get("isBot")) {
+          ws.close(1003, "The websocket endpoint is only used by bots");
+        }
+        bunWs.subscribe("bot");
+      },
+      onClose(_event, ws) {
+        const bunWs = ws.raw as ServerWebSocket;
+        bunWs.unsubscribe("bot");
+      },
+    };
+  }),
+);
 
 app.route("", authApp);
 

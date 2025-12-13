@@ -9,7 +9,14 @@ import {
   SidebarMenuButton,
   SidebarGroupLabel,
   SidebarGroupContent,
+  SidebarGroupAction,
 } from "#/components/ui/sidebar";
+
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "#/components/ui/tooltip";
 
 import {
   DropdownMenu,
@@ -25,6 +32,7 @@ import {
   ChevronUp,
   PlusCircle,
   LayoutDashboard,
+  TriangleAlert,
 } from "lucide-react";
 import {
   createContext,
@@ -118,6 +126,10 @@ export function DashboardSidebar() {
 
   const inviteMutation = useMutation(trpc.authed.makeInvite.mutationOptions());
 
+  const guildRefreshMutation = useMutation(
+    trpc.authed.guild.refreshGuild.mutationOptions(),
+  );
+
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
@@ -198,6 +210,28 @@ export function DashboardSidebar() {
           <>
             <SidebarGroup>
               <SidebarGroupLabel>General</SidebarGroupLabel>
+              <SidebarGroupAction
+                onClick={async () => {
+                  const result = await guildRefreshMutation.mutateAsync({
+                    guildId: dashboardContext.guild!.id,
+                  });
+
+                  if (result.success) {
+                    toast.success(result.message);
+                  } else {
+                    toast.error(result.message);
+                  }
+                }}
+              >
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <TriangleAlert />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Delete the UK (guild refresh)</p>
+                  </TooltipContent>
+                </Tooltip>
+              </SidebarGroupAction>
               <SidebarGroupContent>
                 <SidebarMenu>
                   <SidebarMenuItem>

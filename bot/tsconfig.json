@@ -30,7 +30,8 @@
       "#commands/*": ["./src/commands/*"],
       "#modules/*": ["../website/src/modules/*"],
       "#routes/*": ["../website/src/routes/*"],
-      "#/types/*": ["../website/src/types/*"]
+      "#/types/*": ["../website/src/types/*"],
+      "#botBase": ["./src/index.ts"]
     }
   }
 }

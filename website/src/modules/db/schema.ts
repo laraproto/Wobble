@@ -49,7 +49,7 @@ export const guild = pgTable("guilds", {
   name: varchar("name", { length: 256 }).notNull(),
   guildId: varchar("guild_id", { length: 256 }).notNull().unique(),
   iconHash: varchar("icon_hash", { length: 256 }),
-  bannnerHash: varchar("banner_hash", { length: 256 }),
+  bannerHash: varchar("banner_hash", { length: 256 }),
   ownerId: varchar("owner_id", { length: 256 })
     .references(() => user.discordId, { onDelete: "cascade" })
     .notNull(),

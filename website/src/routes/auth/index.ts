@@ -57,8 +57,6 @@ authApp.get("/callback", async (c) => {
     return c.text("Complete installer first", 400);
   }
 
-  console.log(code, storedState, state);
-
   if (
     code === undefined ||
     storedState === undefined ||

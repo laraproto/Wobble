@@ -17,7 +17,7 @@ const botRouter = router({
             name: input.name,
             ownerId: input.ownerId,
             iconHash: input.iconHash,
-            bannnerHash: input.bannnerHash,
+            bannerHash: input.bannerHash,
           })
           .returning();
 
@@ -33,6 +33,7 @@ const botRouter = router({
           guild: newGuild[0],
         };
       } catch (err) {
+        console.error("Error creating guild:", err);
         return {
           success: false,
           message: `DB Insert Failed: ${(err as Error).message}`,
@@ -57,26 +58,69 @@ const botRouter = router({
       guild: null,
     };
   }),
+  updateGuild: botProcedure
+    .input(guildInsertSchema)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const updateResult = await db
+          .update(schema.guild)
+          .set({
+            name: input.name,
+            ownerId: input.ownerId,
+            iconHash: input.iconHash,
+            bannerHash: input.bannerHash,
+          })
+          .where(eq(schema.guild.guildId, input.guildId))
+          .returning();
+
+        if (updateResult.length === 0) {
+          return {
+            success: false,
+            message: "Guild not found",
+          };
+        }
+
+        return {
+          success: true,
+          message: "Guild updated",
+          guild: updateResult[0],
+        };
+      } catch (err) {
+        console.error("Error updating guild:", err);
+        return {
+          success: false,
+          message: `DB update failed: ${(err as Error).message}`,
+        };
+      }
+    }),
   removeGuild: botProcedure
     .input(zodSnowflake)
     .mutation(async ({ ctx, input }) => {
-      const deleteResult = await db
-        .delete(schema.guild)
-        .where(eq(schema.guild.guildId, input))
-        .returning();
+      try {
+        const deleteResult = await db
+          .delete(schema.guild)
+          .where(eq(schema.guild.guildId, input))
+          .returning();
 
-      if (deleteResult.length === 0) {
+        if (deleteResult.length === 0) {
+          return {
+            success: false,
+            message: "Guild not found or already deleted",
+          };
+        }
+
+        return {
+          success: true,
+          message: "Guild successfully removed",
+          guild: deleteResult[0],
+        };
+      } catch (err) {
+        console.error("Error deleting guild:", err);
         return {
           success: false,
-          message: "Guild not found or already deleted",
+          message: `DB update failed: ${(err as Error).message}`,
         };
       }
-
-      return {
-        success: true,
-        message: "Guild successfully removed",
-        guild: deleteResult[0],
-      };
     }),
 });
 

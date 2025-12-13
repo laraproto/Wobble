@@ -2,20 +2,22 @@ import { serve } from "bun";
 import index from "./index.html" with { type: "html" };
 import { PORT } from "./modules/config";
 import { installerConfig } from "./modules/installer";
+import { websocket, type BunWebSocketData } from "hono/bun";
 
 export let serverUrl: URL | null = null;
+export let server: Bun.Server<BunWebSocketData> | null = null;
 
 const apiInit = async () => {
   const routes = await import("#routes/index");
 
-  const server = serve({
+  server = serve({
     routes: {
       // Serve index.html for all unmatched routes.
       "/*": index,
 
       "/api/*": routes.default.fetch,
     },
-
+    websocket,
     development: process.env.NODE_ENV !== "production" && {
       // Enable browser hot reloading in development
       hmr: true,

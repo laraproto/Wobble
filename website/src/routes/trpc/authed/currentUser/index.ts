@@ -52,16 +52,29 @@ const currentUserRouter = router({
         // Might actually be faster to do a sql query for each instead of loop in a loop
         const localisedGuild = addedGuilds.find((g) => g.guildId === guild.id);
 
-        guilds.push({
-          id: guild.id,
-          name: guild.name,
-          permissions: guild.permissions,
-          icon: guild.icon,
-          banner: guild.banner,
-          owner: guild.owner,
-          inviteable: !localisedGuild,
-          uuid: localisedGuild?.uuid || null,
-        });
+        if (!localisedGuild) {
+          guilds.push({
+            id: guild.id,
+            name: guild.name,
+            permissions: guild.permissions,
+            icon: guild.icon,
+            banner: guild.banner,
+            owner: guild.owner,
+            inviteable: true,
+            uuid: null,
+          });
+        } else {
+          guilds.push({
+            id: localisedGuild.guildId,
+            name: localisedGuild.name,
+            permissions: guild.permissions,
+            icon: localisedGuild.iconHash,
+            banner: localisedGuild.bannerHash,
+            owner: guild.owner,
+            inviteable: false,
+            uuid: localisedGuild.uuid,
+          });
+        }
         continue;
       }
     }

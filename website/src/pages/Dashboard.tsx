@@ -5,6 +5,7 @@ import { Route, useParams, useLocation, useSearchParams } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { trpc } from "#lib/trpc";
 import { GuildBase } from "./dashboardPages/GuildBase";
+import { Suspense } from "react";
 
 export function Dashboard() {
   const [location, navigate] = useLocation();
@@ -18,6 +19,11 @@ export function Dashboard() {
     return <div>Loading</div>;
   }
 
+  if (!userQuery.data) {
+    navigate("~/");
+    return <div>Redirecting</div>;
+  }
+
   const guildUuid = searchParams.get("uuid");
 
   return (
@@ -27,13 +33,13 @@ export function Dashboard() {
       guilds={guildQuery.data!}
     >
       <DashboardLayout>
-        <div>
+        <Suspense fallback={<div>Loading...</div>}>
           <Route path="/:guild" component={GuildBase} nest />
 
           <Route path="/">
             <h1 className="text-3xl font-bold">Dashboard</h1>
           </Route>
-        </div>
+        </Suspense>
       </DashboardLayout>
     </DashboardProvider>
   );
