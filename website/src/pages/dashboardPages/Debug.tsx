@@ -7,18 +7,23 @@ import {
   CardContent,
   CardFooter,
 } from "#/components/ui/card";
+import { useLocation } from "wouter";
 
-export function Overview() {
+export function Debug() {
+  const [location, navigate] = useLocation();
   const dashboardContext = useDashboard();
+
+  if (!dashboardContext.configuration.development) {
+    navigate("/overview");
+  }
 
   return (
     <div className="container mx-auto relative my-4 ">
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">Overview</CardTitle>
+          <CardTitle className="text-2xl font-bold">Debug</CardTitle>
           <CardDescription>
-            Initially this description was something not very quirky so I
-            deleted it, might replace it with something else
+            Primarily dev test stuff, might give it to superadmins tho
           </CardDescription>
           <CardContent></CardContent>
           <CardFooter></CardFooter>

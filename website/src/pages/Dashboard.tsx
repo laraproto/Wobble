@@ -1,6 +1,6 @@
-import { DashboardLayout } from "#/components/DashboardLayout";
-import { DashboardProvider } from "#/components/DashboardSidebar";
-import { Route, useParams, useLocation, useSearchParams } from "wouter";
+import { DashboardLayout } from "#/components/dashboard/DashboardLayout";
+import { DashboardProvider } from "#/components/dashboard/DashboardSidebar";
+import { Route, useLocation } from "wouter";
 
 import { useQuery } from "@tanstack/react-query";
 import { trpc } from "#lib/trpc";
@@ -9,13 +9,18 @@ import { Suspense } from "react";
 
 export function Dashboard() {
   const [location, navigate] = useLocation();
-  const [searchParams, setSearchParams] = useSearchParams();
+
+  const configurationQuery = useQuery(trpc.configuration.queryOptions());
 
   const userQuery = useQuery(trpc.authed.currentUser.me.queryOptions());
 
   const guildQuery = useQuery(trpc.authed.currentUser.getGuilds.queryOptions());
 
-  if (userQuery.isLoading || guildQuery.isLoading) {
+  if (
+    userQuery.isLoading ||
+    guildQuery.isLoading ||
+    configurationQuery.isLoading
+  ) {
     return <div>Loading</div>;
   }
 
@@ -23,14 +28,11 @@ export function Dashboard() {
     navigate("~/");
     return <div>Redirecting</div>;
   }
-
-  const guildUuid = searchParams.get("uuid");
-
   return (
     <DashboardProvider
       user={userQuery.data!}
-      selectedServerId={guildUuid || undefined}
       guilds={guildQuery.data!}
+      configuration={configurationQuery.data!}
     >
       <DashboardLayout>
         <Suspense fallback={<div>Loading...</div>}>

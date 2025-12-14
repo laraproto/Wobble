@@ -2,7 +2,8 @@ import "./index.css";
 
 import { Toaster } from "#/components/ui/sonner";
 import { ThemeProvider } from "#/components/theme-provider";
-import { Route, Switch } from "wouter";
+import { Route, Router, Switch } from "wouter";
+import { useHashLocation } from "wouter/use-hash-location";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/trpc";
 
@@ -17,15 +18,17 @@ export function App() {
     <>
       <ThemeProvider defaultTheme="dark" storageKey="ui-theme">
         <QueryClientProvider client={queryClient}>
-          <Switch>
-            <Route path="/test" component={Test} />
-            <Route path="/installer" component={Installer} />
+          <Router hook={useHashLocation}>
+            <Switch>
+              <Route path="/test" component={Test} />
+              <Route path="/installer" component={Installer} />
 
-            <Route path="/" component={Home} />
-            <Route path="/dashboard" component={Dashboard} nest />
+              <Route path="/" component={Home} />
+              <Route path="/dashboard" component={Dashboard} nest />
 
-            <Route component={NotFound} />
-          </Switch>
+              <Route component={NotFound} />
+            </Switch>
+          </Router>
           <Toaster position="top-center" />
         </QueryClientProvider>
       </ThemeProvider>

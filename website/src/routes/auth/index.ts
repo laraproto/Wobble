@@ -23,7 +23,7 @@ authApp.get("/redirect", async (c) => {
   }
 
   if (c.get("user")) {
-    return c.redirect("/dashboard", 307);
+    return c.redirect("/#/dashboard", 307);
   }
 
   if (!discord) {
@@ -77,7 +77,7 @@ authApp.get("/callback", async (c) => {
       return c.text("Guild miss somehow, bot might be offline?", 400);
     }
 
-    return c.redirect(`/dashboard/${getGuild.uuid}/overview`);
+    return c.redirect(`/#/dashboard/${getGuild.uuid}/overview`);
   }
 
   try {
@@ -126,7 +126,7 @@ authApp.get("/callback", async (c) => {
 
     await setSessionUser(c.get("session")!.id, user[0].uuid);
 
-    return c.redirect("/dashboard", 307);
+    return c.redirect("/#/dashboard", 307);
   } catch (e) {
     if (e instanceof arctic.OAuth2RequestError) {
       // Invalid authorization code, credentials, or redirect URI

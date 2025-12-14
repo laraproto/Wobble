@@ -1,5 +1,16 @@
 import { BOT_TOKEN } from "#botModules/config";
-import { Client, Events, GatewayIntentBits, Guild } from "discord.js";
+import {
+  ChatInputCommandInteraction,
+  Client,
+  REST,
+  Collection,
+  Events,
+  GatewayIntentBits,
+  Guild,
+  SlashCommandBuilder,
+  InteractionType,
+  MessageFlags,
+} from "discord.js";
 import trpc from "#botModules/trpc";
 import "#botModules/ws";
 
@@ -8,9 +19,20 @@ if (import.meta.main) {
   process.exit(0);
 }
 
-export const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+export interface BotCommand {
+  data: SlashCommandBuilder;
+  execute: (interaction: ChatInputCommandInteraction) => Promise<void>;
+}
 
-client.once(Events.ClientReady, (readyClient) => {
+export const rest = new REST().setToken(BOT_TOKEN);
+
+export const client: Client<boolean> & {
+  commands?: Collection<string, BotCommand>;
+} = new Client({ intents: [GatewayIntentBits.Guilds] });
+
+client.commands = new Collection<string, BotCommand>();
+
+client.once(Events.ClientReady, async (readyClient) => {
   console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 
   console.log("Checking guilds for any possible misses");
@@ -30,6 +52,8 @@ client.once(Events.ClientReady, (readyClient) => {
       }
     }
   });
+
+  await import("./commands/index.ts");
 });
 
 client.on(Events.GuildCreate, async (createEvent) => {
@@ -42,6 +66,40 @@ client.on(Events.GuildCreate, async (createEvent) => {
     console.log(
       `Failed to add guild: ${createEvent.name}, Reason: ${addGuildResult.message}`,
     );
+  }
+});
+
+client.on(Events.InteractionCreate, async (interaction) => {
+  switch (interaction.type) {
+    case InteractionType.ApplicationCommand: {
+      if (!interaction.isChatInputCommand()) return;
+
+      const command = client.commands!.get(interaction.commandName);
+
+      if (!command) {
+        console.error(
+          `Attempt to execute command ${interaction.commandName} failed, no matching command`,
+        );
+        return;
+      }
+
+      try {
+        await command.execute(interaction);
+      } catch (err) {
+        console.error(err);
+        if (interaction.replied || interaction.deferred) {
+          await interaction.followUp({
+            content: "There was an error while executing this command!",
+            flags: MessageFlags.Ephemeral,
+          });
+        } else {
+          await interaction.reply({
+            content: "There was an error while executing this command!",
+            flags: MessageFlags.Ephemeral,
+          });
+        }
+      }
+    }
   }
 });
 

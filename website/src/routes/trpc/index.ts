@@ -20,6 +20,7 @@ export const appRouter = router({
     return {
       installed: !!installerConfig,
       url: installerConfig?.url,
+      development: process.env.NODE_ENV !== "production",
     };
   }),
   installer: installerRouter,
