@@ -66,6 +66,25 @@ async function processWSEvents(data: string) {
         break;
       }
     }
+    case "guildRefetch": {
+      try {
+        const guild = await client.guilds.fetch(parsedData.data.guildId);
+
+        const getGuild = await trpc.bot.checkGuild.query(guild.id);
+
+        if (!getGuild.success || !getGuild.guild) break;
+
+        client.guildConfig!.set(
+          parsedData.data.guildId,
+          getGuild.guild.settings,
+        );
+        console.log("Guild refetched and updated successfully:", guild.id);
+        break;
+      } catch (err) {
+        console.error("Error refetching guild:", err);
+        break;
+      }
+    }
     default: {
       console.log("Received unhandled WS event:", parsedData);
       break;

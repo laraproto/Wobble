@@ -28,9 +28,13 @@ export const rest = new REST().setToken(BOT_TOKEN);
 
 export const client: Client<boolean> & {
   commands?: Collection<string, BotCommand>;
+  // Guild config schema is not yet made
+  guildConfig?: Collection<string, unknown>;
 } = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 client.commands = new Collection<string, BotCommand>();
+
+client.guildConfig = new Collection<string, unknown>();
 
 client.once(Events.ClientReady, async (readyClient) => {
   console.log(`Ready! Logged in as ${readyClient.user.tag}`);
@@ -43,13 +47,16 @@ client.once(Events.ClientReady, async (readyClient) => {
       console.log(`Guild not found in DB, adding: ${guild.name}`);
       const addGuildResult = await addGuild(guild);
 
-      if (addGuildResult.success) {
+      if (addGuildResult.success && addGuildResult.guild) {
         console.log(`Successfully added guild: ${guild.name}`);
+        client.guildConfig!.set(guild.id, addGuildResult.guild.settings);
       } else {
         console.log(
           `Failed to add guild: ${guild.name}, Reason: ${addGuildResult.message}`,
         );
       }
+    } else {
+      client.guildConfig!.set(guild.id, getGuild.guild.settings);
     }
   });
 
@@ -60,8 +67,9 @@ client.on(Events.GuildCreate, async (createEvent) => {
   console.log(`Joined guild: ${createEvent.name}`);
   const addGuildResult = await addGuild(createEvent);
 
-  if (addGuildResult.success) {
+  if (addGuildResult.success && addGuildResult.guild) {
     console.log(`Successfully added guild: ${createEvent.name}`);
+    client.guildConfig!.set(createEvent.id, addGuildResult.guild.settings);
   } else {
     console.log(
       `Failed to add guild: ${createEvent.name}, Reason: ${addGuildResult.message}`,

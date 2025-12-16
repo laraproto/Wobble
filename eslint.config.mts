@@ -5,8 +5,6 @@ import tseslint from "typescript-eslint";
 import { fileURLToPath } from "node:url";
 import pluginReact from "eslint-plugin-react";
 import { defineConfig } from "eslint/config";
-import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
-
 const gitignorePath = fileURLToPath(new URL("./.gitignore", import.meta.url));
 
 export default defineConfig([
@@ -28,5 +26,4 @@ export default defineConfig([
   pluginReact.configs.flat.recommended!,
   pluginReact.configs.flat["jsx-runtime"]!,
   includeIgnoreFile(gitignorePath),
-  eslintPluginPrettierRecommended,
 ]);
