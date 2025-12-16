@@ -1,8 +1,10 @@
 import { useDashboard } from "#/components/dashboard/DashboardSidebar";
 import { useParams, Route, Redirect } from "wouter";
-import { Overview } from "./Overview";
 import { useEffect } from "react";
-import { Debug } from "./Debug";
+
+import { Overview } from "./general/Overview";
+import { Debug } from "./general/Debug";
+import { Users } from "./general/Users";
 
 export function GuildBase() {
   const params = useParams();
@@ -19,7 +21,10 @@ export function GuildBase() {
   return (
     <>
       <Route path="/overview" component={Overview} />
-      <Route path="/debug" component={Debug} />
+      <Route path="/users" component={Users} />
+      {dashboardContext.configuration.development && (
+        <Route path="/debug" component={Debug} />
+      )}
       <Route path="/">
         <h1 className="text-3xl font-bold">
           Guild Dashboard for {params.guild}

@@ -7,23 +7,17 @@ import {
   CardContent,
   CardFooter,
 } from "#/components/ui/card";
-import { useLocation } from "wouter";
 
-export function Debug() {
-  const [location, navigate] = useLocation();
+export function Users() {
   const dashboardContext = useDashboard();
 
-  if (!dashboardContext.configuration.development) {
-    navigate("/overview");
-  }
-
   return (
-    <div className="container mx-auto relative my-4 ">
+    <div className="container mx-auto relative">
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">Debug</CardTitle>
+          <CardTitle className="text-2xl font-bold">Users</CardTitle>
           <CardDescription>
-            Primarily dev test stuff, might give it to superadmins tho
+            Revoke or add access to dashboard users
           </CardDescription>
           <CardContent></CardContent>
           <CardFooter></CardFooter>

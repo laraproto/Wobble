@@ -12,7 +12,7 @@ export function Overview() {
   const dashboardContext = useDashboard();
 
   return (
-    <div className="container mx-auto relative my-4 ">
+    <div className="container mx-auto relative">
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl font-bold">Overview</CardTitle>

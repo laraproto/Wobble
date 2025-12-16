@@ -25,6 +25,7 @@
   ],
   "dependencies": {
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-prettier": "^5.5.4"
+    "eslint-plugin-prettier": "^5.5.4",
+    "jiti": "^2.6.1"
   }
 }

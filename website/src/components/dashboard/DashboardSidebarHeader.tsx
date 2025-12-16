@@ -1,7 +1,7 @@
 import { useDashboard } from "./DashboardSidebar";
 
 import { useMutation } from "@tanstack/react-query";
-import { queryClient, trpc } from "#lib/trpc";
+import { trpc } from "#lib/trpc";
 
 import { navigate } from "wouter/use-hash-location";
 
