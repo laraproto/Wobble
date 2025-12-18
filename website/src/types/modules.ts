@@ -7,6 +7,18 @@ import { zodSnowflake } from "./discord";
 // z.object({config: modActionsSchema, overrides: z.array(z.object({level: z.string(), config: modActionsSchema}))}) but that would be mad ugly, and tiring
 // need to see if zod has anything built in to allow me to generate something like this
 
+function pluginWithOverrides<T extends z.ZodObject>(schema: T) {
+  return z.object({
+    config: schema,
+    overrides: z.array(
+      z.object({
+        level: z.string(),
+        config: schema,
+      }),
+    ),
+  });
+}
+
 export const modActionsSchema = z.object({
   dm_on_warn: z.boolean().default(true),
   dm_on_kick: z.boolean().default(false),
@@ -46,7 +58,9 @@ export const modActionsSchema = z.object({
   can_deletecase: z.boolean().default(false),
 });
 
-export const pluginsSchema = z.object({});
+export const pluginsSchema = z.object({
+  modActions: pluginWithOverrides(modActionsSchema),
+});
 
 export const botConfigSchema = z.object({
   levels: z.record(zodSnowflake, z.number().min(0).max(100)),
