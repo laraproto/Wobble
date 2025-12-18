@@ -7,19 +7,39 @@ import { zodSnowflake } from "./discord";
 // z.object({config: modActionsSchema, overrides: z.array(z.object({level: z.string(), config: modActionsSchema}))}) but that would be mad ugly, and tiring
 // need to see if zod has anything built in to allow me to generate something like this
 
-function pluginWithOverrides<T extends z.ZodObject>(schema: T) {
-  return z.object({
-    config: schema,
-    overrides: z.array(
-      z.object({
-        level: z.string(),
-        config: schema,
-      }),
-    ),
-  });
+export const levelParsingRegex = /^\s*(>=|<=|=|>|<)\s*(\d+)\s*$/;
+
+function plugin<T extends z.ZodObject>(schema: T) {
+  return z
+    .object({
+      config: schema,
+      overrides: z
+        .array(
+          z.object({
+            level: z.string(),
+            config: schema,
+          }),
+        )
+        .optional(),
+    })
+    .optional();
 }
 
-export const modActionsSchema = z.object({
+export const configValidatorSchema = z.object({
+  config: z.looseObject({}),
+  overrides: z
+    .array(
+      z.object({
+        level: z.string(),
+        config: z.looseObject({}),
+      }),
+    )
+    .optional(),
+});
+
+export type ConfigValidatorSchema = z.infer<typeof configValidatorSchema>;
+
+export const baseModActionsSchema = z.object({
   dm_on_warn: z.boolean().default(true),
   dm_on_kick: z.boolean().default(false),
   dm_on_ban: z.boolean().default(false),
@@ -58,14 +78,16 @@ export const modActionsSchema = z.object({
   can_deletecase: z.boolean().default(false),
 });
 
+const modActionsSchema = plugin(baseModActionsSchema);
+
 export const pluginsSchema = z.object({
-  modActions: pluginWithOverrides(modActionsSchema),
+  modActions: modActionsSchema,
 });
 
 export const botConfigSchema = z.object({
-  levels: z.record(zodSnowflake, z.number().min(0).max(100)),
+  levels: z.record(zodSnowflake, z.number().min(0).max(100)).optional(),
 
-  plugins: pluginsSchema,
+  plugins: pluginsSchema.optional(),
 });
 
 export {};
