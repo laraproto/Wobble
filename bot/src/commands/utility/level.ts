@@ -3,8 +3,8 @@ import { SlashCommandBuilder } from "discord.js";
 
 export default {
   data: new SlashCommandBuilder()
-    .setName("level")
-    .setDescription("Gets your level"),
+    .setName("permlevel")
+    .setDescription("Gets your permission level"),
   guildOnly: true,
   async execute(interaction, ctx) {
     await interaction.reply({

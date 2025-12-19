@@ -17,6 +17,15 @@ export default {
     .setDescription("Kicks a user from the server"),
   requiredPlugin: "modActions",
   guildOnly: true,
+  async canExecute(plugin?: BaseModActionsSchema) {
+    if (!plugin) return [false, "Plugin is not configured"];
+    if (!plugin.can_kick)
+      return [
+        false,
+        "You do not meet the level conditions for kicking or kicking is disabled",
+      ];
+    return [true, ""];
+  },
   async execute(
     interaction,
     ctx: { level: number; plugin?: BaseModActionsSchema },

@@ -14,7 +14,7 @@ import {
 import trpc from "#botModules/trpc";
 import "#botModules/ws";
 import type { BotConfigSchema, PluginsList } from "#/types/modules.ts";
-import { checkLevel } from "#botModules/level/index.ts";
+import { checkLevel } from "#botModules/level.ts";
 import { parseConfig } from "@wobble/website/configParser";
 
 if (import.meta.main) {
@@ -27,6 +27,7 @@ export interface BotCommand {
   guildOnly: boolean;
   // right now a command can only depend on one plugin, might change in the future
   requiredPlugin?: PluginsList;
+  canExecute?: <T>(plugin?: T) => Promise<[boolean, string]>;
   execute: <T>(
     interaction: ChatInputCommandInteraction,
     ctx: {
@@ -43,7 +44,13 @@ export const client: Client<boolean> & {
   commands?: Collection<string, BotCommand>;
   // Guild config schema is not yet made
   guildConfig?: Collection<string, BotConfigSchema>;
-} = new Client({ intents: [GatewayIntentBits.Guilds] });
+} = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.AutoModerationExecution,
+    GatewayIntentBits.GuildModeration,
+  ],
+});
 
 client.commands = new Collection<string, BotCommand>();
 
@@ -75,6 +82,8 @@ client.once(Events.ClientReady, async (readyClient) => {
 
   await import("./commands/index.ts");
 });
+
+client.on(Events.AutoModerationActionExecution, async (execution) => {});
 
 client.on(Events.GuildCreate, async (createEvent) => {
   console.log(`Joined guild: ${createEvent.name}`);
@@ -152,6 +161,19 @@ client.on(Events.InteractionCreate, async (interaction) => {
         }
         const parsedConfig = await parseConfig(foundPlugin, level);
         plugin = parsedConfig;
+      }
+
+      if (command.canExecute) {
+        const [canExec, reason] = await command.canExecute(plugin);
+        if (!canExec) {
+          await interaction.reply({
+            content:
+              reason ||
+              "Execute condition failed, no reason has been provided.",
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
       }
 
       try {

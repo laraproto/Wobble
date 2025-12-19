@@ -63,13 +63,13 @@ export function Debug() {
             >
               Guild Refresh (potentially desctructive)
             </Button>
-            <div className="grid w-full gap-2">
+            <div className="grid w-full gap-2 my-2">
               <Textarea
                 value={testParse}
                 onChange={(e) => setTestParse(e.target.value)}
                 placeholder="Type your parse here"
               />
-              <div className="flex flex-row">
+              <div className="flex flex-row space-x-2">
                 <Button
                   onClick={async () => {
                     const parseResult = await testParseMutation.mutateAsync({
@@ -113,6 +113,28 @@ export function Debug() {
                   }}
                 >
                   Save config
+                </Button>
+                <Button
+                  onClick={async () => {
+                    const parseResult = await saveConfigMutation.mutateAsync({
+                      ...JSON.parse(testParse || "{}"),
+                      guildId: dashboardContext.guild!.id,
+                    });
+
+                    if (parseResult.success) {
+                      toast.success(parseResult.message, {
+                        description: JSON.stringify(parseResult.guild),
+                        closeButton: true,
+                      });
+                    } else {
+                      toast.error(parseResult.message, {
+                        description: JSON.stringify(parseResult.guild),
+                        closeButton: true,
+                      });
+                    }
+                  }}
+                >
+                  Pull config (not functional)
                 </Button>
               </div>
             </div>

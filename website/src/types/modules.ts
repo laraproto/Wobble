@@ -7,7 +7,7 @@ import { zodSnowflake } from "./discord";
 // z.object({config: modActionsSchema, overrides: z.array(z.object({level: z.string(), config: modActionsSchema}))}) but that would be mad ugly, and tiring
 // need to see if zod has anything built in to allow me to generate something like this
 
-export const levelParsingRegex = /^\s*(>=|<=|=|>|<)\s*(\d+)\s*$/;
+export const operationParsingRegex = /^\s*(>=|<=|=|>|<)\s*(\d+)\s*$/;
 
 function plugin<T extends z.ZodObject>(schema: T) {
   return z
@@ -17,7 +17,7 @@ function plugin<T extends z.ZodObject>(schema: T) {
       overrides: z
         .array(
           z.object({
-            level: z.string(),
+            level: z.string().regex(operationParsingRegex),
             config: schema,
           }),
         )
@@ -83,8 +83,64 @@ export type BaseModActionsSchema = z.infer<typeof baseModActionsSchema>;
 
 const modActionsSchema = plugin(baseModActionsSchema);
 
+export const baseCountersSchema = z.object({
+  counters: z.record(
+    z.string(),
+    z.object({
+      per_channel: z.boolean().default(false),
+      per_user: z.boolean().default(false),
+      initial_value: z.number().default(0),
+      triggers: z.record(
+        z.string(),
+        z.object({
+          condition: z.string().regex(operationParsingRegex),
+        }),
+      ),
+      decay: z.never().optional(), // Not implemented yet time handling fucking sucks
+    }),
+  ),
+  can_view: z.boolean().default(false),
+  can_edit: z.boolean().default(false),
+  can_reset_all: z.boolean().default(false),
+});
+
+const countersSchema = plugin(baseCountersSchema);
+
+export const baseAutomodSchema = z.object({
+  rules: z.record(
+    z.string(),
+    z.object({
+      enabled: z.boolean().default(true),
+      triggers: z.object({
+        automod_trigger: z
+          .object({
+            ruleId: zodSnowflake,
+          })
+          .optional(),
+        counter_trigger: z
+          .object({
+            counter: z.string(),
+            trigger: z.string(),
+          })
+          .optional(),
+      }),
+      actions: z.object({
+        warn: z
+          .object({
+            reason: z
+              .string()
+              .max(400)
+              .default("Automod rule {{rule_name}} triggered"),
+          })
+          .optional(),
+      }),
+    }),
+  ),
+});
+
 export const pluginsSchema = z.object({
   modActions: modActionsSchema,
+  counters: countersSchema,
 });
 
 export const pluginsList = z.enum(pluginsSchema.keyof().options);

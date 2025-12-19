@@ -1,10 +1,13 @@
-import { levelParsingRegex, type ConfigValidatorSchema } from "./types/modules";
+import {
+  operationParsingRegex,
+  type ConfigValidatorSchema,
+} from "./types/modules";
 
-export async function parseLevelCondition(
+export async function parseNumberCondition(
   condition: string,
-  userLevel: number,
+  numberInput: number,
 ): Promise<boolean> {
-  const result = levelParsingRegex.exec(condition);
+  const result = operationParsingRegex.exec(condition);
 
   if (!result || !result[1] || !result[2]) {
     return false;
@@ -12,17 +15,17 @@ export async function parseLevelCondition(
 
   switch (result[1]) {
     case ">":
-      return userLevel > parseInt(result[2], 10);
+      return numberInput > parseInt(result[2], 10);
     case ">=":
-      return userLevel >= parseInt(result[2], 10);
+      return numberInput >= parseInt(result[2], 10);
     case "<":
-      return userLevel < parseInt(result[2], 10);
+      return numberInput < parseInt(result[2], 10);
     case "<=":
-      return userLevel <= parseInt(result[2], 10);
+      return numberInput <= parseInt(result[2], 10);
     case "=":
-      return userLevel === parseInt(result[2], 10);
+      return numberInput === parseInt(result[2], 10);
     default:
-      return userLevel === parseInt(result[2], 10);
+      return numberInput === parseInt(result[2], 10);
   }
 }
 
@@ -36,7 +39,7 @@ export async function parseConfig<T>(
 
   let finalConfig = { ...config.config };
   for (const override of config.overrides) {
-    const levelMatch = await parseLevelCondition(override.level, userLevel);
+    const levelMatch = await parseNumberCondition(override.level, userLevel);
 
     if (levelMatch) {
       finalConfig = {
