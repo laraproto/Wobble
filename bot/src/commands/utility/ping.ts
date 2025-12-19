@@ -5,6 +5,7 @@ export default {
   data: new SlashCommandBuilder()
     .setName("ping")
     .setDescription("Gets current round trip latency"),
+  guildOnly: false,
   async execute(interaction) {
     const sent = await interaction.reply({ content: "Pinging..." });
 

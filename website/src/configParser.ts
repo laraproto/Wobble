@@ -1,4 +1,3 @@
-import z from "zod";
 import { levelParsingRegex, type ConfigValidatorSchema } from "./types/modules";
 
 export async function parseLevelCondition(
@@ -32,7 +31,7 @@ export async function parseConfig<T>(
   userLevel: number,
 ): Promise<T> {
   if (!config.overrides) {
-    return config;
+    return config.config;
   }
 
   let finalConfig = { ...config.config };

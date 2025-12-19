@@ -3,6 +3,8 @@ import { botConfigSchema } from "#/types/modules";
 import { guildProcedure, router } from "#modules/trpc";
 import { sendEvent } from "#routes/websocket/index.ts";
 import { parseConfig } from "#/configParser";
+import { eq } from "drizzle-orm";
+import { db, schema } from "#modules/db/index.ts";
 
 const guildRouter = router({
   refreshGuild: guildProcedure.mutation(async ({ input }) => {
@@ -64,6 +66,33 @@ const guildRouter = router({
         return {
           success: false,
           message: "Something went wrong with testing the config",
+        };
+      }
+    }),
+  saveConfig: guildProcedure
+    .input(botConfigSchema)
+    .mutation(async ({ input, ctx }) => {
+      try {
+        const guildUpdateResult = await db
+          .update(schema.guild)
+          .set({
+            settings: input,
+          })
+          .where(eq(schema.guild.guildId, ctx.guild.guildId))
+          .returning();
+
+        await sendEvent("guildRefetch", { guildId: input.guildId });
+
+        return {
+          success: true,
+          message: "Config saved successfully",
+          guild: guildUpdateResult[0],
+        };
+      } catch (err) {
+        console.error("Failed to save config", err);
+        return {
+          success: false,
+          message: "Something went wrong with saving the config",
         };
       }
     }),

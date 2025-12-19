@@ -13,6 +13,8 @@ import {
 } from "discord.js";
 import trpc from "#botModules/trpc";
 import "#botModules/ws";
+import type { BotConfigSchema } from "#/types/modules.ts";
+import { checkLevel } from "#botModules/level/index.ts";
 
 if (import.meta.main) {
   console.log("You are not supposed to run this");
@@ -21,7 +23,11 @@ if (import.meta.main) {
 
 export interface BotCommand {
   data: SlashCommandBuilder;
-  execute: (interaction: ChatInputCommandInteraction) => Promise<void>;
+  guildOnly: boolean;
+  execute: (
+    interaction: ChatInputCommandInteraction,
+    ctx: { level: number },
+  ) => Promise<void>;
 }
 
 export const rest = new REST().setToken(BOT_TOKEN);
@@ -29,12 +35,12 @@ export const rest = new REST().setToken(BOT_TOKEN);
 export const client: Client<boolean> & {
   commands?: Collection<string, BotCommand>;
   // Guild config schema is not yet made
-  guildConfig?: Collection<string, unknown>;
+  guildConfig?: Collection<string, BotConfigSchema>;
 } = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 client.commands = new Collection<string, BotCommand>();
 
-client.guildConfig = new Collection<string, unknown>();
+client.guildConfig = new Collection<string, BotConfigSchema>();
 
 client.once(Events.ClientReady, async (readyClient) => {
   console.log(`Ready! Logged in as ${readyClient.user.tag}`);
@@ -91,8 +97,20 @@ client.on(Events.InteractionCreate, async (interaction) => {
         return;
       }
 
+      let level: number = 0;
+      if (!interaction.guild && command.guildOnly) {
+        await interaction.reply({
+          content: "This command can only be used in a server.",
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+
+      if (interaction.guild)
+        level = await checkLevel(interaction.guild.id, interaction.user.id);
+
       try {
-        await command.execute(interaction);
+        await command.execute(interaction, { level });
       } catch (err) {
         console.error(err);
         if (interaction.replied || interaction.deferred) {

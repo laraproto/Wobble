@@ -90,4 +90,6 @@ export const botConfigSchema = z.object({
   plugins: pluginsSchema.optional(),
 });
 
+export type BotConfigSchema = z.infer<typeof botConfigSchema>;
+
 export {};

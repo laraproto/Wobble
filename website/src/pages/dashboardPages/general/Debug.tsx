@@ -34,6 +34,10 @@ export function Debug() {
     trpc.authed.guild.testConfig.mutationOptions(),
   );
 
+  const saveConfigMutation = useMutation(
+    trpc.authed.guild.saveConfig.mutationOptions(),
+  );
+
   return (
     <div className="container mx-auto relative">
       <Card>
@@ -65,28 +69,52 @@ export function Debug() {
                 onChange={(e) => setTestParse(e.target.value)}
                 placeholder="Type your parse here"
               />
-              <Button
-                onClick={async () => {
-                  const parseResult = await testParseMutation.mutateAsync({
-                    ...JSON.parse(testParse || "{}"),
-                    guildId: dashboardContext.guild!.id,
-                  });
+              <div className="flex flex-row">
+                <Button
+                  onClick={async () => {
+                    const parseResult = await testParseMutation.mutateAsync({
+                      ...JSON.parse(testParse || "{}"),
+                      guildId: dashboardContext.guild!.id,
+                    });
 
-                  if (parseResult.success) {
-                    toast.success(parseResult.message, {
-                      description: JSON.stringify(parseResult.config),
-                      closeButton: true,
+                    if (parseResult.success) {
+                      toast.success(parseResult.message, {
+                        description: JSON.stringify(parseResult.config),
+                        closeButton: true,
+                      });
+                    } else {
+                      toast.error(parseResult.message, {
+                        description: JSON.stringify(parseResult.errors),
+                        closeButton: true,
+                      });
+                    }
+                  }}
+                >
+                  Send test parse
+                </Button>
+                <Button
+                  onClick={async () => {
+                    const parseResult = await saveConfigMutation.mutateAsync({
+                      ...JSON.parse(testParse || "{}"),
+                      guildId: dashboardContext.guild!.id,
                     });
-                  } else {
-                    toast.error(parseResult.message, {
-                      description: JSON.stringify(parseResult.errors),
-                      closeButton: true,
-                    });
-                  }
-                }}
-              >
-                Send test parse
-              </Button>
+
+                    if (parseResult.success) {
+                      toast.success(parseResult.message, {
+                        description: JSON.stringify(parseResult.guild),
+                        closeButton: true,
+                      });
+                    } else {
+                      toast.error(parseResult.message, {
+                        description: JSON.stringify(parseResult.guild),
+                        closeButton: true,
+                      });
+                    }
+                  }}
+                >
+                  Save config
+                </Button>
+              </div>
             </div>
           </CardContent>
           <CardFooter></CardFooter>

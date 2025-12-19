@@ -1,0 +1,35 @@
+import { client } from "#botBase";
+import type { Snowflake } from "discord.js";
+
+export async function checkLevel(
+  guildId: Snowflake,
+  userId: Snowflake,
+): Promise<number> {
+  const guildSettings = client.guildConfig!.get(guildId);
+
+  if (!guildSettings) return 0;
+
+  if (!guildSettings.levels) return 0;
+
+  const guild = client.guilds.cache.get(guildId);
+
+  const userLevel = guildSettings.levels[userId];
+
+  if (!userLevel) return 0;
+
+  if (!guild) return userLevel;
+
+  const member = await guild.members.fetch(userId).catch(() => null);
+
+  if (!member) return userLevel;
+
+  let highestRoleLevel = 0;
+  for (const roleId of member.roles.cache.keys()) {
+    const roleLevel = guildSettings.levels[roleId];
+    if (roleLevel && roleLevel > highestRoleLevel) {
+      highestRoleLevel = roleLevel;
+    }
+  }
+
+  return Math.max(userLevel, highestRoleLevel);
+}
