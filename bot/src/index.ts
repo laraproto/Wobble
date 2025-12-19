@@ -13,8 +13,9 @@ import {
 } from "discord.js";
 import trpc from "#botModules/trpc";
 import "#botModules/ws";
-import type { BotConfigSchema } from "#/types/modules.ts";
+import type { BotConfigSchema, PluginsList } from "#/types/modules.ts";
 import { checkLevel } from "#botModules/level/index.ts";
+import { parseConfig } from "@wobble/website/configParser";
 
 if (import.meta.main) {
   console.log("You are not supposed to run this");
@@ -24,9 +25,15 @@ if (import.meta.main) {
 export interface BotCommand {
   data: SlashCommandBuilder;
   guildOnly: boolean;
-  execute: (
+  // right now a command can only depend on one plugin, might change in the future
+  requiredPlugin?: PluginsList;
+  execute: <T>(
     interaction: ChatInputCommandInteraction,
-    ctx: { level: number },
+    ctx: {
+      level: number;
+      guildSettings?: BotConfigSchema;
+      plugin?: T;
+    },
   ) => Promise<void>;
 }
 
@@ -106,11 +113,49 @@ client.on(Events.InteractionCreate, async (interaction) => {
         return;
       }
 
-      if (interaction.guild)
-        level = await checkLevel(interaction.guild.id, interaction.user.id);
+      let guildSettings: BotConfigSchema | undefined = undefined;
+      if (interaction.guild) {
+        guildSettings = client.guildConfig!.get(interaction.guild.id);
+        if (!guildSettings) {
+          await interaction.reply({
+            content: "I don't know what this server is.",
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+        level = await checkLevel(
+          guildSettings,
+          interaction.guild.id,
+          interaction.user.id,
+        );
+      }
+
+      let plugin: unknown | undefined = undefined;
+      if (command.requiredPlugin) {
+        if (!guildSettings || !guildSettings.plugins) {
+          await interaction.reply({
+            content: "This server has no plugins configured.",
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+        const foundPlugin =
+          guildSettings.plugins[
+            command.requiredPlugin as keyof typeof guildSettings.plugins
+          ];
+        if (!foundPlugin) {
+          await interaction.reply({
+            content: `The required plugin (${command.requiredPlugin}) is not configured on this server.`,
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+        const parsedConfig = await parseConfig(foundPlugin, level);
+        plugin = parsedConfig;
+      }
 
       try {
-        await command.execute(interaction, { level });
+        await command.execute(interaction, { level, guildSettings, plugin });
       } catch (err) {
         console.error(err);
         if (interaction.replied || interaction.deferred) {

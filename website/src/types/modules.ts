@@ -12,7 +12,8 @@ export const levelParsingRegex = /^\s*(>=|<=|=|>|<)\s*(\d+)\s*$/;
 function plugin<T extends z.ZodObject>(schema: T) {
   return z
     .object({
-      config: schema,
+      //@ts-expect-error this works, loads default config if none provided
+      config: schema.prefault({}),
       overrides: z
         .array(
           z.object({
@@ -78,16 +79,22 @@ export const baseModActionsSchema = z.object({
   can_deletecase: z.boolean().default(false),
 });
 
+export type BaseModActionsSchema = z.infer<typeof baseModActionsSchema>;
+
 const modActionsSchema = plugin(baseModActionsSchema);
 
 export const pluginsSchema = z.object({
   modActions: modActionsSchema,
 });
 
+export const pluginsList = z.enum(pluginsSchema.keyof().options);
+
+export type PluginsList = z.infer<typeof pluginsList>;
+
 export const botConfigSchema = z.object({
   levels: z.record(zodSnowflake, z.number().min(0).max(100)).optional(),
 
-  plugins: pluginsSchema.optional(),
+  plugins: pluginsSchema.prefault({}),
 });
 
 export type BotConfigSchema = z.infer<typeof botConfigSchema>;

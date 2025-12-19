@@ -11,6 +11,7 @@ import {
 import { relations, sql } from "drizzle-orm";
 import { z } from "zod";
 import { createSelectSchema, createInsertSchema } from "drizzle-zod";
+import type { BotConfigSchema } from "#/types/modules";
 
 const timeData = {
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
@@ -53,7 +54,7 @@ export const guild = pgTable("guilds", {
   ownerId: varchar("owner_id", { length: 256 })
     .references(() => user.discordId, { onDelete: "cascade" })
     .notNull(),
-  settings: jsonb("settings").notNull().default({}).$type<{}>(),
+  settings: jsonb("settings").notNull().default({}).$type<BotConfigSchema>(),
   ...timeData,
 });
 

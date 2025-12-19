@@ -1,12 +1,12 @@
+import type { BotConfigSchema } from "#/types/modules";
 import { client } from "#botBase";
 import type { Snowflake } from "discord.js";
 
 export async function checkLevel(
+  guildSettings: BotConfigSchema,
   guildId: Snowflake,
   userId: Snowflake,
 ): Promise<number> {
-  const guildSettings = client.guildConfig!.get(guildId);
-
   if (!guildSettings) return 0;
 
   if (!guildSettings.levels) return 0;

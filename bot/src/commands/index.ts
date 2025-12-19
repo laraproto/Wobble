@@ -6,8 +6,12 @@ import {
 } from "discord.js";
 
 import utilityCommands from "./utility";
+import moderationCommands from "./moderation";
 
-const commands: BotCommand[] = [...utilityCommands] as const;
+const commands: BotCommand[] = [
+  ...utilityCommands,
+  ...moderationCommands,
+] as const;
 const commandsData: RESTPostAPIChatInputApplicationCommandsJSONBody[] = [];
 
 for await (const command of commands) {
