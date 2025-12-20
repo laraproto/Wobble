@@ -83,26 +83,28 @@ export type BaseModActionsSchema = z.infer<typeof baseModActionsSchema>;
 
 const modActionsSchema = plugin(baseModActionsSchema);
 
-export const baseCountersSchema = z.object({
-  counters: z.record(
+export const baseCounterObjectSchema = z.object({
+  per_channel: z.boolean().default(false),
+  per_user: z.boolean().default(false),
+  initial_value: z.number().default(0),
+  triggers: z.record(
     z.string(),
     z.object({
-      per_channel: z.boolean().default(false),
-      per_user: z.boolean().default(false),
-      initial_value: z.number().default(0),
-      triggers: z.record(
-        z.string(),
-        z.object({
-          condition: z.string().regex(operationParsingRegex),
-        }),
-      ),
-      decay: z.never().optional(), // Not implemented yet time handling fucking sucks
+      condition: z.string().regex(operationParsingRegex),
     }),
   ),
+});
+
+export const baseCountersSchema = z.object({
+  counters: z.record(z.string(), baseCounterObjectSchema).default({}),
   can_view: z.boolean().default(false),
   can_edit: z.boolean().default(false),
   can_reset_all: z.boolean().default(false),
 });
+
+export type BaseCountersSchema = z.infer<typeof baseCountersSchema>;
+
+export type BaseCounterObjectSchema = z.infer<typeof baseCounterObjectSchema>;
 
 const countersSchema = plugin(baseCountersSchema);
 
@@ -133,6 +135,34 @@ export const baseAutomodSchema = z.object({
               .default("Automod rule {{rule_name}} triggered"),
           })
           .optional(),
+        mute: z.object({
+          duration_seconds: z.number().min(1).default(600),
+          reason: z
+            .string()
+            .max(400)
+            .default("Automod rule {{rule_name}} triggered"),
+        }),
+        kick: z.object({
+          reason: z
+            .string()
+            .max(400)
+            .default("Automod rule {{rule_name}} triggered"),
+        }),
+        ban: z.object({
+          duration_seconds: z.number().min(1).optional(),
+          reason: z
+            .string()
+            .max(400)
+            .default("Automod rule {{rule_name}} triggered"),
+        }),
+        add_counter: z.object({
+          counter: z.string(),
+          value: z.number().default(1),
+        }),
+        remove_counter: z.object({
+          counter: z.string(),
+          value: z.number().default(1),
+        }),
       }),
     }),
   ),

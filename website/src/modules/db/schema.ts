@@ -7,6 +7,7 @@ import {
   boolean,
   uuid,
   jsonb,
+  integer,
 } from "drizzle-orm/pg-core";
 import { relations, sql } from "drizzle-orm";
 import { z } from "zod";
@@ -58,6 +59,40 @@ export const guild = pgTable("guilds", {
   ...timeData,
 });
 
+export const guildCounters = pgTable("guild_counters", {
+  uuid: uuid("id").primaryKey().defaultRandom(),
+  guildId: uuid("guild_id")
+    .references(() => guild.uuid, { onDelete: "cascade" })
+    .notNull(),
+  initialValue: integer().notNull().default(0),
+  counterName: text("counter_name").notNull().unique(),
+  perUser: boolean("per_user").notNull().default(false),
+  perChannel: boolean("per_channel").notNull().default(true),
+  ...timeData,
+});
+
+export const guildCounterValues = pgTable("guild_counter_values", {
+  uuid: uuid("id").primaryKey().defaultRandom(),
+  counterId: uuid("counter_id")
+    .references(() => guildCounters.uuid, { onDelete: "cascade" })
+    .notNull(),
+  userId: varchar("user_id", { length: 256 }),
+  channelId: varchar("channel_id", { length: 256 }),
+  value: integer().notNull().default(0),
+  ...timeData,
+});
+
+export const guildCounterTriggers = pgTable("guild_counter_trigger", {
+  uuid: uuid("id").primaryKey().defaultRandom(),
+  counterId: uuid("counter_id")
+    .references(() => guildCounters.uuid, {
+      onDelete: "cascade",
+    })
+    .notNull(),
+  triggerName: text("trigger_name").notNull(),
+  triggerCondition: varchar("trigger_condition", { length: 8 }).notNull(),
+});
+
 export const sessionRelations = relations(session, ({ one }) => ({
   user: one(user, {
     fields: [session.userId],
@@ -77,6 +112,8 @@ export const sessionInsertSchema = createInsertSchema(session);
 
 export const guildSelectSchema = createSelectSchema(guild);
 export const guildInsertSchema = createInsertSchema(guild);
+
+export const guildCounterSelectSchema = createSelectSchema(guildCounters);
 
 export const userSelectMinimal = userSelectSchema.omit({
   totpSecret: true,
@@ -107,3 +144,5 @@ export type UserInsert = z.infer<typeof userInsertSchema>;
 
 export type Guild = z.infer<typeof guildSelectSchema>;
 export type GuildInsert = z.infer<typeof guildInsertSchema>;
+
+export type GuildCounter = z.infer<typeof guildCounterSelectSchema>;

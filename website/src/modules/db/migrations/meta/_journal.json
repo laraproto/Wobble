@@ -36,6 +36,20 @@
       "when": 1765642143030,
       "tag": "0004_gigantic_kronos",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1766236087045,
+      "tag": "0005_mean_mastermind",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1766238493177,
+      "tag": "0006_happy_bulldozer",
+      "breakpoints": true
     }
   ]
 }

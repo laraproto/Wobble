@@ -1,0 +1,1 @@
+ALTER TABLE "guild_counters" ADD COLUMN "initialValue" integer DEFAULT 0 NOT NULL;

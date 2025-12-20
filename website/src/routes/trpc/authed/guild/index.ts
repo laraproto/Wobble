@@ -5,6 +5,7 @@ import { sendEvent } from "#routes/websocket/index.ts";
 import { parseConfig } from "#/configParser";
 import { eq } from "drizzle-orm";
 import { db, schema } from "#modules/db/index.ts";
+import { applyGuildSettings } from "#modules/guild/index.ts";
 
 const guildRouter = router({
   refreshGuild: guildProcedure.mutation(async ({ input }) => {
@@ -71,20 +72,19 @@ const guildRouter = router({
     .input(botConfigSchema)
     .mutation(async ({ input, ctx }) => {
       try {
-        const guildUpdateResult = await db
-          .update(schema.guild)
-          .set({
-            settings: input,
-          })
-          .where(eq(schema.guild.guildId, ctx.guild.guildId))
-          .returning();
+        const result = await applyGuildSettings(ctx.guild.guildId, input);
 
-        await sendEvent("guildRefetch", { guildId: input.guildId });
+        if (!result) {
+          return {
+            success: false,
+            message: "Failed to apply guild settings",
+          };
+        }
 
         return {
           success: true,
           message: "Config saved successfully",
-          guild: guildUpdateResult[0],
+          guild: result,
         };
       } catch (err) {
         console.error("Failed to save config", err);
