@@ -108,69 +108,90 @@ export type BaseCounterObjectSchema = z.infer<typeof baseCounterObjectSchema>;
 
 const countersSchema = plugin(baseCountersSchema);
 
-export const baseAutomodSchema = z.object({
-  rules: z.record(
-    z.string(),
-    z.object({
-      enabled: z.boolean().default(true),
-      triggers: z.object({
-        automod_trigger: z
-          .object({
-            ruleId: zodSnowflake,
-          })
-          .optional(),
-        counter_trigger: z
-          .object({
-            counter: z.string(),
-            trigger: z.string(),
-          })
-          .optional(),
-      }),
-      actions: z.object({
-        warn: z
-          .object({
-            reason: z
-              .string()
-              .max(400)
-              .default("Automod rule {{rule_name}} triggered"),
-          })
-          .optional(),
-        mute: z.object({
+export const baseAutomodRuleObjectSchema = z.object({
+  enabled: z.boolean().default(true),
+  triggers: z.object({
+    automod_trigger: z
+      .object({
+        ruleId: zodSnowflake,
+      })
+      .optional(),
+    //This can only have one counter as input, need to fix that later
+    counter_trigger: z
+      .object({
+        counter: z.string(),
+        trigger: z.string(),
+      })
+      .optional(),
+  }),
+  actions: z
+    .object({
+      warn: z
+        .object({
+          reason: z
+            .string()
+            .max(400)
+            .default("Automod rule {{rule_name}} triggered"),
+        })
+        .optional(),
+      mute: z
+        .object({
           duration_seconds: z.number().min(1).default(600),
           reason: z
             .string()
             .max(400)
             .default("Automod rule {{rule_name}} triggered"),
-        }),
-        kick: z.object({
+        })
+        .optional(),
+      kick: z
+        .object({
           reason: z
             .string()
             .max(400)
             .default("Automod rule {{rule_name}} triggered"),
-        }),
-        ban: z.object({
+        })
+        .optional(),
+      ban: z
+        .object({
           duration_seconds: z.number().min(1).optional(),
           reason: z
             .string()
             .max(400)
             .default("Automod rule {{rule_name}} triggered"),
-        }),
-        add_counter: z.object({
+        })
+        .optional(),
+      add_counter: z
+        .object({
           counter: z.string(),
           value: z.number().default(1),
-        }),
-        remove_counter: z.object({
+        })
+        .optional(),
+      remove_counter: z
+        .object({
           counter: z.string(),
           value: z.number().default(1),
-        }),
-      }),
-    }),
-  ),
+        })
+        .optional(),
+    })
+    .optional(),
 });
+
+export const baseAutomodSchema = z.object({
+  rules: z.record(z.string(), baseAutomodRuleObjectSchema),
+});
+
+export type BaseAutomodRuleObjectSchema = z.infer<
+  typeof baseAutomodRuleObjectSchema
+>;
+
+export type BaseAutomodSchema = z.infer<typeof baseAutomodSchema>;
+
+export const automodSchema = plugin(baseAutomodSchema);
 
 export const pluginsSchema = z.object({
   modActions: modActionsSchema,
   counters: countersSchema,
+  automod: automodSchema,
 });
 
 export const pluginsList = z.enum(pluginsSchema.keyof().options);

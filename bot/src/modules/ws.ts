@@ -1,8 +1,13 @@
 import { BOT_SESSION, URL } from "./config";
-import { type WSMessage } from "#/types/ws";
+import {
+  type WSMessage,
+  type GuildIdEvent,
+  type CounterTriggerEvent,
+} from "#/types/ws";
 import trpc from "#botModules/trpc";
 import { client } from "#botBase";
 import type { DiscordAPIError } from "discord.js";
+import { processCounterTrigger } from "./counter";
 
 export const WS_URL = `${URL}api/ws`;
 
@@ -33,7 +38,8 @@ async function processWSEvents(data: string) {
   switch (parsedData.event) {
     case "guildUpdate": {
       try {
-        const guild = await client.guilds.fetch(parsedData.data.guildId);
+        const parsedEvent = parsedData.data as GuildIdEvent;
+        const guild = await client.guilds.fetch(parsedEvent.guildId);
 
         const trpcQuery = await trpc.bot.updateGuild.mutate({
           name: guild.name,
@@ -52,11 +58,13 @@ async function processWSEvents(data: string) {
         const discordApiError = err as DiscordAPIError;
         if (discordApiError.code === 10004) {
           console.log("Bot isn't in server, purging it from api");
+          const parsedEvent = parsedData.data as GuildIdEvent;
+
           const trpcQuery = await trpc.bot.removeGuild.mutate(
-            parsedData.data.guildId,
+            parsedEvent.guildId,
           );
           if (trpcQuery.success) {
-            console.log("Guild removed successfully:", parsedData.data.guildId);
+            console.log("Guild removed successfully:", parsedEvent.guildId);
           } else {
             console.error("Error removing guild:", trpcQuery.message);
           }
@@ -68,22 +76,28 @@ async function processWSEvents(data: string) {
     }
     case "guildRefetch": {
       try {
-        const guild = await client.guilds.fetch(parsedData.data.guildId);
+        const parsedEvent = parsedData.data as GuildIdEvent;
+
+        const guild = await client.guilds.fetch(parsedEvent.guildId);
 
         const getGuild = await trpc.bot.checkGuild.query(guild.id);
 
         if (!getGuild.success || !getGuild.guild) break;
 
-        client.guildConfig!.set(
-          parsedData.data.guildId,
-          getGuild.guild.settings,
-        );
+        client.guildConfig!.set(parsedEvent.guildId, getGuild.guild.settings);
         console.log("Guild refetched and updated successfully:", guild.id);
         break;
       } catch (err) {
         console.error("Error refetching guild:", err);
         break;
       }
+    }
+    case "counterTrigger": {
+      const parsedEvent = parsedData.data as CounterTriggerEvent;
+
+      await processCounterTrigger(parsedEvent);
+
+      break;
     }
     default: {
       console.log("Received unhandled WS event:", parsedData);

@@ -1,4 +1,3 @@
-import z from "zod";
 import { sendEvent } from "#routes/websocket/index.ts";
 import { type Snowflake } from "#/types/discord";
 import {
@@ -58,19 +57,19 @@ export async function applyPlugins(
         ] as BotConfigSchema["plugins"]["counters"];
         const oldPluginData: BotConfigSchema["plugins"]["counters"] =
           oldPlugins[typedPluginName] as BotConfigSchema["plugins"]["counters"];
-        if (!pluginData || !oldPluginData) {
+        if (!pluginData) {
           console.log("No counters plugin data to apply or no old data");
           deleteCountersIfAny(guildId);
           break;
         }
-        if (oldPluginData.config.counters === pluginData.config.counters) {
+        if (oldPluginData?.config.counters === pluginData.config.counters) {
           console.log("No changes in counters config");
           break;
         }
         await applyCounters(
           guildId,
-          oldPluginData.config.counters,
           pluginData.config.counters,
+          oldPluginData?.config.counters || undefined,
         );
         break;
       }
@@ -84,40 +83,44 @@ export async function applyPlugins(
 
 export async function applyCounters(
   guildId: Snowflake,
-  oldCounters: BaseCountersSchema["counters"],
   counters: BaseCountersSchema["counters"],
+  oldCounters?: BaseCountersSchema["counters"],
 ) {
-  const oldCounterNames = Object.keys(oldCounters);
   const newCounterNames = Object.keys(counters);
-  for await (const oldCounter of oldCounterNames) {
-    if (!newCounterNames.includes(oldCounter)) {
-      console.log(`Deleting counter: ${oldCounter}`);
-      await db
-        .delete(schema.guildCounters)
-        .where(
-          and(
-            eq(schema.guildCounters.guildId, guildId),
-            eq(schema.guildCounters.counterName, oldCounter),
-          ),
-        );
+  if (oldCounters) {
+    const oldCounterNames = Object.keys(oldCounters);
+    for await (const oldCounter of oldCounterNames) {
+      if (!newCounterNames.includes(oldCounter)) {
+        console.log(`Deleting counter: ${oldCounter}`);
+        await db
+          .delete(schema.guildCounters)
+          .where(
+            and(
+              eq(schema.guildCounters.guildId, guildId),
+              eq(schema.guildCounters.counterName, oldCounter),
+            ),
+          );
+      }
     }
   }
   for await (const counterName of newCounterNames) {
     // Old counter used to update existing if one does exist
-    const oldCounter = oldCounters[counterName];
+    if (oldCounters) {
+      const oldCounter = oldCounters[counterName];
 
-    if (oldCounter) {
-      const counterInDb = await db.query.guildCounters.findFirst({
-        where: eq(schema.guildCounters.counterName, counterName),
-      });
-      handleOldCounter(
-        guildId,
-        oldCounter,
-        counters[counterName]!,
-        counterName,
-        counterInDb!,
-      );
-      continue;
+      if (oldCounter) {
+        const counterInDb = await db.query.guildCounters.findFirst({
+          where: eq(schema.guildCounters.counterName, counterName),
+        });
+        handleOldCounter(
+          guildId,
+          oldCounter,
+          counters[counterName]!,
+          counterName,
+          counterInDb!,
+        );
+        continue;
+      }
     }
 
     console.log(`Inserting new counter: ${counterName}`);

@@ -12,7 +12,7 @@ export let db:
   | ReturnType<typeof drizzle<typeof schema>>
   | ReturnType<typeof drizzlePgLite<typeof schema>>;
 
-let client: SQL | PGlite | undefined = undefined;
+global.client = undefined;
 
 const buildDatabaseClient = async () => {
   if (!installerConfig?.database_type) {
@@ -37,6 +37,10 @@ const buildDatabaseClient = async () => {
 };
 
 (() => {
+  if (global.client) {
+    return;
+  }
+
   buildDatabaseClient().then((createdClient) => {
     client = createdClient;
 
@@ -47,8 +51,9 @@ const buildDatabaseClient = async () => {
 
     switch (installerConfig.database_type) {
       case "pglite":
+        //eslint-disable-next-line no-case-declarations
         const pglite = drizzlePgLite({
-          client: client as PGlite,
+          client: global.client as PGlite,
           schema,
           logger: true,
         });
@@ -56,8 +61,9 @@ const buildDatabaseClient = async () => {
         db = pglite;
         break;
       case "postgres":
+        //eslint-disable-next-line no-case-declarations
         const postgres = drizzle({
-          client: client as SQL,
+          client: global.client as SQL,
           schema,
           logger: true,
         });

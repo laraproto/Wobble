@@ -11,6 +11,10 @@ declare global {
     toJSON(): string;
   }
   var botGlobal: Bun.Subprocess<"ignore", "inherit", "inherit"> | null;
+  var client:
+    | import("bun").SQL
+    | import("@electric-sql/pglite").PGlite
+    | undefined;
 }
 
 export {};

@@ -3,6 +3,7 @@ import { router, botProcedure } from "#modules/trpc";
 import { zodSnowflake } from "#/types/discord";
 import { db, schema } from "#modules/db/index.ts";
 import { eq, and, isNull } from "drizzle-orm";
+import { handleCounterValueChange } from "#modules/guild/counter.ts";
 
 const counterRouter = router({
   incrementCounter: botProcedure
@@ -141,6 +142,8 @@ const counterRouter = router({
           });
         }
       }
+
+      await handleCounterValueChange(counter.uuid, input.value);
 
       return {
         success: true,
@@ -284,6 +287,8 @@ const counterRouter = router({
         }
       }
 
+      await handleCounterValueChange(counter.uuid, input.value);
+
       return {
         success: true,
         message: "Counter decremented successfully",
@@ -425,6 +430,8 @@ const counterRouter = router({
           });
         }
       }
+
+      await handleCounterValueChange(counter.uuid, input.value);
 
       return {
         success: true,
@@ -595,6 +602,8 @@ const counterRouter = router({
           });
         }
       }
+
+      await handleCounterValueChange(counter.uuid, counter.initialValue);
 
       return {
         success: true,
