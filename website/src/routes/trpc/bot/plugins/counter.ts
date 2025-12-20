@@ -2,7 +2,7 @@ import z from "zod";
 import { router, botProcedure } from "#modules/trpc";
 import { zodSnowflake } from "#/types/discord";
 import { db, schema } from "#modules/db/index.ts";
-import { eq, and } from "drizzle-orm";
+import { eq, and, isNull } from "drizzle-orm";
 
 const counterRouter = router({
   incrementCounter: botProcedure
@@ -110,6 +110,41 @@ const counterRouter = router({
             value: counter.initialValue + input.value,
           });
         }
+
+        if (!counter.perUser && !counter.perChannel) {
+          const existingEntry = await db.query.guildCounterValues.findFirst({
+            where: and(
+              eq(schema.guildCounterValues.counterId, counter.uuid),
+              isNull(schema.guildCounterValues.channelId),
+              isNull(schema.guildCounterValues.userId),
+            ),
+          });
+
+          if (existingEntry) {
+            await db
+              .update(schema.guildCounterValues)
+              .set({
+                value: existingEntry.value + input.value,
+              })
+              .where(
+                and(
+                  eq(schema.guildCounterValues.counterId, counter.uuid),
+                  isNull(schema.guildCounterValues.channelId),
+                  isNull(schema.guildCounterValues.userId),
+                ),
+              );
+          } else {
+            await db.insert(schema.guildCounterValues).values({
+              counterId: counter.uuid,
+              value: counter.initialValue + input.value,
+            });
+          }
+        }
+
+        return {
+          success: true,
+          message: "Counter incremented successfully",
+        };
       }
     }),
   decrementCounter: botProcedure
@@ -217,6 +252,41 @@ const counterRouter = router({
             value: counter.initialValue - input.value,
           });
         }
+
+        if (!counter.perUser && !counter.perChannel) {
+          const existingEntry = await db.query.guildCounterValues.findFirst({
+            where: and(
+              eq(schema.guildCounterValues.counterId, counter.uuid),
+              isNull(schema.guildCounterValues.channelId),
+              isNull(schema.guildCounterValues.userId),
+            ),
+          });
+
+          if (existingEntry) {
+            await db
+              .update(schema.guildCounterValues)
+              .set({
+                value: existingEntry.value - input.value,
+              })
+              .where(
+                and(
+                  eq(schema.guildCounterValues.counterId, counter.uuid),
+                  isNull(schema.guildCounterValues.channelId),
+                  isNull(schema.guildCounterValues.userId),
+                ),
+              );
+          } else {
+            await db.insert(schema.guildCounterValues).values({
+              counterId: counter.uuid,
+              value: counter.initialValue - input.value,
+            });
+          }
+        }
+
+        return {
+          success: true,
+          message: "Counter decremented successfully",
+        };
       }
     }),
 });
