@@ -14,7 +14,7 @@ import { useLocation } from "wouter";
 import { toast } from "sonner";
 import { useState } from "react";
 
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { trpc } from "#lib/trpc";
 
 export function Debug() {
@@ -36,6 +36,17 @@ export function Debug() {
 
   const saveConfigMutation = useMutation(
     trpc.authed.guild.saveConfig.mutationOptions(),
+  );
+
+  const pullConfigQuery = useQuery(
+    trpc.authed.guild.pullConfig.queryOptions(
+      {
+        guildId: dashboardContext.guild!.id,
+      },
+      {
+        enabled: false,
+      },
+    ),
   );
 
   return (
@@ -116,21 +127,14 @@ export function Debug() {
                 </Button>
                 <Button
                   onClick={async () => {
-                    const parseResult = await saveConfigMutation.mutateAsync({
-                      ...JSON.parse(testParse || "{}"),
-                      guildId: dashboardContext.guild!.id,
-                    });
+                    const pullResult = await pullConfigQuery.refetch();
 
-                    if (parseResult.success) {
-                      toast.success(parseResult.message, {
-                        description: JSON.stringify(parseResult.guild),
+                    if (pullResult.data) {
+                      toast.success("Config pulled", {
+                        description: JSON.stringify(pullResult.data),
                         closeButton: true,
                       });
-                    } else {
-                      toast.error(parseResult.message, {
-                        description: JSON.stringify(parseResult.guild),
-                        closeButton: true,
-                      });
+                      setTestParse(JSON.stringify(pullResult.data, null, 2));
                     }
                   }}
                 >

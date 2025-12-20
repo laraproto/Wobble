@@ -29,8 +29,8 @@ export async function parseNumberCondition(
   }
 }
 
-export async function parseConfig<T>(
-  config: ConfigValidatorSchema & { config: T },
+export async function parseConfig<T extends ConfigValidatorSchema["config"]>(
+  config: ConfigValidatorSchema,
   userLevel: number,
 ): Promise<T> {
   if (!config.overrides) {

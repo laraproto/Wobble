@@ -45,15 +45,13 @@ const guildRouter = router({
           };
         }
 
-        for (const plugins of Object.keys(parseResult.data.plugins)) {
-          console.log("Parsing plugin:", plugins);
+        for (const plugin of Object.keys(parseResult.data.plugins)) {
+          console.log("Parsing plugin:", plugin);
           const pluginData =
             parseResult.data.plugins[
-              plugins as keyof typeof parseResult.data.plugins
+              plugin as keyof typeof parseResult.data.plugins
             ];
-          console.log(pluginData);
-
-          console.log((await parseConfig(pluginData!, 50)).warn_message);
+          console.log(await parseConfig(pluginData!, 50));
         }
 
         return {
@@ -96,6 +94,9 @@ const guildRouter = router({
         };
       }
     }),
+  pullConfig: guildProcedure.query(async ({ ctx }) => {
+    return ctx.guild.settings;
+  }),
 });
 
 export default guildRouter;

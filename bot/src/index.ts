@@ -16,6 +16,7 @@ import "#botModules/ws";
 import type { BotConfigSchema, PluginsList } from "#/types/modules.ts";
 import { checkLevel } from "#botModules/level.ts";
 import { parseConfig } from "@wobble/website/configParser";
+import handlebars from "handlebars";
 
 if (import.meta.main) {
   console.log("You are not supposed to run this");
@@ -42,8 +43,11 @@ export const rest = new REST().setToken(BOT_TOKEN);
 
 export const client: Client<boolean> & {
   commands?: Collection<string, BotCommand>;
-  // Guild config schema is not yet made
   guildConfig?: Collection<string, BotConfigSchema>;
+  handlebarsTemplates?: Collection<
+    string,
+    [{ [k: string]: ReturnType<typeof handlebars.compile> }]
+  >;
 } = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -55,6 +59,12 @@ export const client: Client<boolean> & {
 client.commands = new Collection<string, BotCommand>();
 
 client.guildConfig = new Collection<string, BotConfigSchema>();
+
+// Might use eventually
+client.handlebarsTemplates = new Collection<
+  string,
+  [{ [k: string]: ReturnType<typeof handlebars.compile> }]
+>();
 
 client.once(Events.ClientReady, async (readyClient) => {
   console.log(`Ready! Logged in as ${readyClient.user.tag}`);

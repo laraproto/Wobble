@@ -1,6 +1,7 @@
 import { type BotCommand } from "#botBase";
 import { SlashCommandBuilder } from "discord.js";
 import { type BaseModActionsSchema } from "#/types/modules";
+import handlebars from "handlebars";
 
 export default {
   data: new SlashCommandBuilder()
@@ -34,8 +35,15 @@ export default {
     const reason =
       interaction.options.getString("reason") ?? "No reason provided";
 
+    const handlebarsTemplate = handlebars.compile(ctx.plugin!.kick_message, {
+      noEscape: true,
+    });
+
     await interaction.reply({
-      content: `Can your level kick: ${ctx.plugin!.can_kick}`,
+      content: handlebarsTemplate({
+        guildName: interaction.guild!.name,
+        reason,
+      }),
     });
   },
 } as BotCommand;

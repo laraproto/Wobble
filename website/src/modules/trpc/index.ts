@@ -14,7 +14,9 @@ interface TRPCContext {
   getStateCookie: () => string | undefined;
 }
 
-interface Meta {}
+interface Meta {
+  test: boolean;
+}
 
 const t = initTRPC.context<TRPCContext>().meta<Meta>().create({
   transformer: superjson,
