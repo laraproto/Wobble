@@ -7,10 +7,12 @@ import {
 
 import utilityCommands from "./utility";
 import moderationCommands from "./moderation";
+import counterCommands from "./counters";
 
 const commands: BotCommand[] = [
   ...utilityCommands,
   ...moderationCommands,
+  ...counterCommands,
 ] as const;
 const commandsData: RESTPostAPIChatInputApplicationCommandsJSONBody[] = [];
 

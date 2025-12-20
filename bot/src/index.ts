@@ -31,7 +31,7 @@ export interface BotCommand {
   canExecute?: <T>(plugin?: T) => Promise<[boolean, string]>;
   execute: <T>(
     interaction: ChatInputCommandInteraction,
-    ctx: {
+    ctx?: {
       level: number;
       guildSettings?: BotConfigSchema;
       plugin?: T;
