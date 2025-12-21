@@ -20,7 +20,7 @@ function plugin<T extends z.ZodObject>(schema: T) {
         .array(
           z.object({
             level: z.string().regex(operationParsingRegex),
-            config: schema,
+            config: schema.partial(),
           }),
         )
         .optional(),
