@@ -143,7 +143,12 @@ const counterRouter = router({
         }
       }
 
-      await handleCounterValueChange(counter.uuid, input.value);
+      await handleCounterValueChange(
+        counter.uuid,
+        input.value,
+        input.user_id,
+        input.channel_id,
+      );
 
       return {
         success: true,
@@ -287,7 +292,12 @@ const counterRouter = router({
         }
       }
 
-      await handleCounterValueChange(counter.uuid, input.value);
+      await handleCounterValueChange(
+        counter.uuid,
+        input.value,
+        input.user_id,
+        input.channel_id,
+      );
 
       return {
         success: true,
@@ -431,7 +441,12 @@ const counterRouter = router({
         }
       }
 
-      await handleCounterValueChange(counter.uuid, input.value);
+      await handleCounterValueChange(
+        counter.uuid,
+        input.value,
+        input.user_id,
+        input.channel_id,
+      );
 
       return {
         success: true,
@@ -603,7 +618,12 @@ const counterRouter = router({
         }
       }
 
-      await handleCounterValueChange(counter.uuid, counter.initialValue);
+      await handleCounterValueChange(
+        counter.uuid,
+        counter.initialValue,
+        input.user_id,
+        input.channel_id,
+      );
 
       return {
         success: true,

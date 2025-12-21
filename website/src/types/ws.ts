@@ -20,6 +20,10 @@ export const counterTriggerEvent = z.object({
   guild_id: zodSnowflake,
   trigger_id: z.uuid(),
   trigger_name: z.string(),
+  per_user: z.boolean().default(false),
+  per_channel: z.boolean().default(false),
+  channel_id: zodSnowflake.optional(),
+  user_id: zodSnowflake.optional(),
 });
 
 export type GuildIdEvent = z.infer<typeof guildIdEvent>;

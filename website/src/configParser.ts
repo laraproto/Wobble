@@ -29,10 +29,14 @@ export async function parseNumberCondition(
   }
 }
 
-export async function parseConfig<T extends ConfigValidatorSchema["config"]>(
-  config: ConfigValidatorSchema,
+export async function parseConfig<T extends ConfigValidatorSchema>(
+  config: T,
   userLevel: number,
-): Promise<T> {
+): Promise<T["config"]> {
+  if (!config) {
+    throw new Error("No config provided");
+  }
+
   if (!config.overrides) {
     return config.config;
   }

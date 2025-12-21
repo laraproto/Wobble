@@ -6,6 +6,8 @@ import { sendEvent } from "#routes/websocket/index.ts";
 export async function handleCounterValueChange(
   counterId: string,
   value: number,
+  userId?: string,
+  channelId?: string,
 ) {
   const counter = await db.query.guildCounters.findFirst({
     where: eq(schema.guildCounters.uuid, counterId),
@@ -41,6 +43,10 @@ export async function handleCounterValueChange(
         guild_id: guild.guildId,
         trigger_id: trigger.uuid,
         trigger_name: trigger.triggerName,
+        per_user: counter.perUser,
+        per_channel: counter.perChannel,
+        channel_id: channelId,
+        user_id: userId,
       });
     }
   }

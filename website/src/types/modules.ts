@@ -198,6 +198,14 @@ export const pluginsList = z.enum(pluginsSchema.keyof().options);
 
 export type PluginsList = z.infer<typeof pluginsList>;
 
+export const pluginsUnion = z.union([
+  modActionsSchema,
+  countersSchema,
+  automodSchema,
+]);
+
+export type PluginsUnion = z.infer<typeof pluginsUnion>;
+
 export const botConfigSchema = z.object({
   levels: z.record(zodSnowflake, z.number().min(0).max(100)).optional(),
 
