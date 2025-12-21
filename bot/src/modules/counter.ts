@@ -53,6 +53,7 @@ export async function processCounterTrigger(trigger: CounterTriggerEvent) {
         `Triggering automod actions on ${rule} because of counter_trigger event from ${trigger.counter_name} with trigger ${trigger.trigger_name}`,
       );
       await handleAutomodActions(
+        rule,
         ruleConfig.actions,
         trigger.user_id,
         trigger.guild_id,

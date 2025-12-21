@@ -85,6 +85,27 @@
       "when": 1766331056478,
       "tag": "0011_nostalgic_champions",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1766336734175,
+      "tag": "0012_panoramic_magma",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1766337909172,
+      "tag": "0013_watery_karen_page",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1766343634147,
+      "tag": "0014_thankful_thunderbolts",
+      "breakpoints": true
     }
   ]
 }

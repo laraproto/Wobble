@@ -8,6 +8,7 @@ import {
   uuid,
   jsonb,
   integer,
+  pgEnum,
 } from "drizzle-orm/pg-core";
 import { relations, sql } from "drizzle-orm";
 import { z } from "zod";
@@ -96,6 +97,31 @@ export const guildCounterTriggers = pgTable("guild_counter_trigger", {
   triggerCondition: varchar("trigger_condition", { length: 8 }).notNull(),
 });
 
+export const caseEnum = pgEnum("case_enum", [
+  "note",
+  "unban",
+  "ban",
+  "warn",
+  "kick",
+  "mute",
+  "unmute",
+  "softban",
+]);
+
+export const guildCases = pgTable("guild_cases", {
+  uuid: uuid("id").primaryKey().defaultRandom(),
+  guildId: uuid("guild_id")
+    .references(() => guild.uuid, { onDelete: "cascade" })
+    .notNull(),
+  caseType: caseEnum("case_type").notNull(),
+  creatorId: varchar("creator_id", { length: 256 }),
+  targetId: varchar("target_id", { length: 256 }).notNull(),
+  messageId: varchar("message_id", { length: 256 }),
+  channelId: varchar("channel_id", { length: 256 }),
+  reason: text("reason"),
+  ...timeData,
+});
+
 export const sessionRelations = relations(session, ({ one }) => ({
   user: one(user, {
     fields: [session.userId],
@@ -117,6 +143,9 @@ export const guildSelectSchema = createSelectSchema(guild);
 export const guildInsertSchema = createInsertSchema(guild);
 
 export const guildCounterSelectSchema = createSelectSchema(guildCounters);
+
+export const guildCasesSelectSchema = createSelectSchema(guildCases);
+export const guildCasesInsertSchema = createInsertSchema(guildCases);
 
 export const userSelectMinimal = userSelectSchema.omit({
   totpSecret: true,
@@ -149,3 +178,6 @@ export type Guild = z.infer<typeof guildSelectSchema>;
 export type GuildInsert = z.infer<typeof guildInsertSchema>;
 
 export type GuildCounter = z.infer<typeof guildCounterSelectSchema>;
+
+export type GuildCase = z.infer<typeof guildCasesSelectSchema>;
+export type GuildCaseInsert = z.infer<typeof guildCasesInsertSchema>;

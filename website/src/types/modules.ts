@@ -229,10 +229,15 @@ export const baseCasesSchema = z.object({
     .optional(),
 });
 
+export type BaseCasesSchema = z.infer<typeof baseCasesSchema>;
+
+const casesSchema = plugin(baseCasesSchema);
+
 export const pluginsSchema = z.object({
   modActions: modActionsSchema,
   counters: countersSchema,
   automod: automodSchema,
+  cases: casesSchema,
 });
 
 export const pluginsList = z.enum(pluginsSchema.keyof().options);
@@ -243,6 +248,7 @@ export const pluginsUnion = z.union([
   modActionsSchema,
   countersSchema,
   automodSchema,
+  casesSchema,
 ]);
 
 export type PluginsUnion = z.infer<typeof pluginsUnion>;

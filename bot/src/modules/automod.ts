@@ -1,9 +1,12 @@
 import { type BaseAutomodRuleObjectSchema } from "#/types/modules";
 import { GuildMember, Guild } from "discord.js";
 import { client } from "#botBase";
+import handlebars from "handlebars";
+import { createCase } from "./cases";
 
 // TODO: Implement automod actions
 export async function handleAutomodActions(
+  ruleName: string,
   actions: BaseAutomodRuleObjectSchema["actions"],
   userId?: string,
   guildId?: string,
@@ -46,10 +49,11 @@ export async function handleAutomodActions(
 
   console.log("User exists");
 
-  await userAutomodActions(actions, user, guild);
+  await userAutomodActions(ruleName, actions, user, guild);
 }
 
 async function userAutomodActions(
+  ruleName: string,
   actions: BaseAutomodRuleObjectSchema["actions"],
   user: GuildMember,
   guild: Guild,
@@ -71,13 +75,44 @@ async function userAutomodActions(
     switch (actionKey) {
       case "warn": {
         const warnAction = action as NonNullable<typeof actions.warn>;
-        // Not implemented yet
+
+        const handlebarsTemplate = handlebars.compile(warnAction.reason, {
+          noEscape: true,
+        });
+
+        const reason = handlebarsTemplate({
+          ruleName,
+        });
+
+        createCase({
+          guildId: guild.id,
+          caseType: "warn",
+          targetId: user.id,
+          creatorId: null,
+          reason,
+        });
+
         break;
       }
       case "mute": {
         const muteAction = action as NonNullable<typeof actions.mute>;
 
-        // Need to handlebars the template and set up cases system
+        const handlebarsTemplate = handlebars.compile(muteAction.reason, {
+          noEscape: true,
+        });
+
+        const reason = handlebarsTemplate({
+          ruleName,
+        });
+
+        createCase({
+          guildId: guild.id,
+          caseType: "mute",
+          targetId: user.id,
+          creatorId: null,
+          reason,
+        });
+
         await user.timeout(
           muteAction.duration_seconds * 1000,
           muteAction.reason,
