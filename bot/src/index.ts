@@ -17,6 +17,7 @@ import type { BotConfigSchema, PluginsList } from "#/types/modules.ts";
 import { checkLevel } from "#botModules/level.ts";
 import { parseConfig } from "@wobble/website/configParser";
 import handlebars from "handlebars";
+import { discordAutomodTrigger } from "#botModules/automod.ts";
 
 if (import.meta.main) {
   console.log("You are not supposed to run this");
@@ -93,7 +94,18 @@ client.once(Events.ClientReady, async (readyClient) => {
   await import("./commands/index.ts");
 });
 
-client.on(Events.AutoModerationActionExecution, async (execution) => {});
+client.on(Events.AutoModerationActionExecution, async (execution) => {
+  if (!execution.userId) {
+    // How tf can automod get triggered without a user
+    return;
+  }
+
+  await discordAutomodTrigger(
+    execution.ruleId,
+    execution.guild.id,
+    execution.userId,
+  );
+});
 
 client.on(Events.GuildCreate, async (createEvent) => {
   console.log(`Joined guild: ${createEvent.name}`);

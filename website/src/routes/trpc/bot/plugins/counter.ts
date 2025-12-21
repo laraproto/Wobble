@@ -57,6 +57,7 @@ const counterRouter = router({
         };
       }
 
+      let baseNumber = counter.initialValue;
       if (counter.perUser && input.user_id) {
         const existingEntry = await db.query.guildCounterValues.findFirst({
           where: and(
@@ -66,6 +67,7 @@ const counterRouter = router({
         });
 
         if (existingEntry) {
+          baseNumber = existingEntry.value;
           await db
             .update(schema.guildCounterValues)
             .set({
@@ -93,6 +95,7 @@ const counterRouter = router({
         });
 
         if (existingEntry) {
+          baseNumber = existingEntry.value;
           await db
             .update(schema.guildCounterValues)
             .set({
@@ -123,6 +126,7 @@ const counterRouter = router({
         });
 
         if (existingEntry) {
+          baseNumber = existingEntry.value;
           await db
             .update(schema.guildCounterValues)
             .set({
@@ -145,7 +149,7 @@ const counterRouter = router({
 
       await handleCounterValueChange(
         counter.uuid,
-        input.value,
+        baseNumber + input.value,
         input.user_id,
         input.channel_id,
       );
@@ -206,6 +210,7 @@ const counterRouter = router({
         };
       }
 
+      let baseNumber = counter.initialValue;
       if (counter.perUser && input.user_id) {
         const existingEntry = await db.query.guildCounterValues.findFirst({
           where: and(
@@ -215,6 +220,7 @@ const counterRouter = router({
         });
 
         if (existingEntry) {
+          baseNumber = existingEntry.value;
           await db
             .update(schema.guildCounterValues)
             .set({
@@ -242,6 +248,7 @@ const counterRouter = router({
         });
 
         if (existingEntry) {
+          baseNumber = existingEntry.value;
           await db
             .update(schema.guildCounterValues)
             .set({
@@ -272,6 +279,7 @@ const counterRouter = router({
         });
 
         if (existingEntry) {
+          baseNumber = existingEntry.value;
           await db
             .update(schema.guildCounterValues)
             .set({
@@ -294,7 +302,7 @@ const counterRouter = router({
 
       await handleCounterValueChange(
         counter.uuid,
-        input.value,
+        baseNumber - input.value,
         input.user_id,
         input.channel_id,
       );

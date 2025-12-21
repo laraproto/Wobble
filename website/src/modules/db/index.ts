@@ -55,7 +55,7 @@ const buildDatabaseClient = async () => {
         const pglite = drizzlePgLite({
           client: global.client as PGlite,
           schema,
-          logger: true,
+          logger: false,
         });
         migrate(pglite);
         db = pglite;
@@ -65,7 +65,7 @@ const buildDatabaseClient = async () => {
         const postgres = drizzle({
           client: global.client as SQL,
           schema,
-          logger: true,
+          logger: false,
         });
         migrate(postgres);
         db = postgres;

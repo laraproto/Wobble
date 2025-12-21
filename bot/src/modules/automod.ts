@@ -3,6 +3,56 @@ import { GuildMember, Guild } from "discord.js";
 import { client } from "#botBase";
 import handlebars from "handlebars";
 import { createCase } from "./cases";
+import { checkLevel } from "./level";
+import { parseConfig } from "@wobble/website/configParser";
+import trpc from "#botModules/trpc";
+
+export async function discordAutomodTrigger(
+  ruleId: string,
+  guildId: string,
+  userId: string,
+) {
+  const guildSettings = client.guildConfig!.get(guildId);
+
+  if (!guildSettings) return;
+
+  if (!guildSettings.plugins.automod?.config.rules) return;
+
+  const level = await checkLevel(guildSettings, guildId, userId);
+
+  let automodConfig = guildSettings.plugins.automod.config;
+
+  if (!automodConfig) {
+    return;
+  }
+
+  if (level) {
+    automodConfig = await parseConfig(guildSettings.plugins.automod, level);
+  }
+
+  for await (const rule of Object.keys(automodConfig.rules)) {
+    const ruleConfig = automodConfig.rules[rule];
+
+    if (!ruleConfig?.enabled) {
+      continue;
+    }
+
+    for await (const triggerConfig of ruleConfig.triggers) {
+      if (!triggerConfig.automod_trigger) {
+        continue;
+      }
+
+      if (triggerConfig.automod_trigger.ruleId !== ruleId) {
+        continue;
+      }
+
+      console.log(
+        `Triggering automod actions on ${rule} because of automod_trigger event from rule ID ${ruleId}`,
+      );
+      await handleAutomodActions(rule, ruleConfig.actions, userId, guildId);
+    }
+  }
+}
 
 // TODO: Implement automod actions
 export async function handleAutomodActions(
@@ -15,14 +65,10 @@ export async function handleAutomodActions(
     return;
   }
 
-  console.log("Actions exist");
-
   if (!guildId) {
     // Automod rules are guild only
     return;
   }
-
-  console.log("Guild ID exists");
 
   const guild = await client.guilds.fetch(guildId);
 
@@ -31,25 +77,17 @@ export async function handleAutomodActions(
     return;
   }
 
-  console.log("Guild exists");
-
   // Current automod rules only support actions targetted to users, need to make it support channel or global counters, to say lock or slowmode a channel
 
   if (!userId) {
     return;
   }
 
-  console.log("User ID exists");
-
   const user = await guild.members.fetch(userId);
 
-  if (!user) {
-    return;
+  if (user) {
+    await userAutomodActions(ruleName, actions, user, guild);
   }
-
-  console.log("User exists");
-
-  await userAutomodActions(ruleName, actions, user, guild);
 }
 
 async function userAutomodActions(
@@ -119,6 +157,19 @@ async function userAutomodActions(
         );
 
         break;
+      }
+      case "add_counter": {
+        const addCounterAction = action as NonNullable<
+          typeof actions.add_counter
+        >;
+
+        await trpc.bot.plugins.counters.incrementCounter.mutate({
+          guildId: guild.id,
+          counterName: addCounterAction.counter,
+          value: addCounterAction.value,
+          user_id: user.id,
+          channel_id: undefined,
+        });
       }
     }
   }

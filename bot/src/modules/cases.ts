@@ -10,6 +10,7 @@ import {
   ButtonBuilder,
   ActionRowBuilder,
   GuildMember,
+  ButtonStyle,
 } from "discord.js";
 import handlebars from "handlebars";
 
@@ -51,6 +52,7 @@ export async function createCase(input: CasesCreateInput): Promise<void> {
     return;
   }
 
+  const guildId = input.guildId;
   input.guildId = actualGuildUUID.guild.uuid;
 
   let channel: GuildTextBasedChannel | null = null;
@@ -124,7 +126,7 @@ export async function createCase(input: CasesCreateInput): Promise<void> {
     });
   }
 
-  handleCaseDM(input);
+  await handleCaseDM({ ...input, guildId: guildId });
 }
 
 export async function handleCaseDM(input: CasesCreateInput): Promise<void> {
@@ -177,9 +179,17 @@ export async function handleCaseDM(input: CasesCreateInput): Promise<void> {
   const originButton = new ButtonBuilder()
     .setCustomId("origin")
     .setLabel(`Sent from: ${guild.name} (${guild.id})`)
+    .setStyle(ButtonStyle.Primary)
     .setDisabled(true);
 
   const originRow = new ActionRowBuilder().addComponents(originButton);
+
+  console.log(
+    modActionsPlugin.dm_on_ban,
+    modActionsPlugin.dm_on_kick,
+    modActionsPlugin.dm_on_warn,
+    input.caseType,
+  );
 
   switch (true) {
     case modActionsPlugin.dm_on_ban && input.caseType === "ban": {
