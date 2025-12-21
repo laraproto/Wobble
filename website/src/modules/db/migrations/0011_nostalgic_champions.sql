@@ -1,0 +1,1 @@
+ALTER TABLE "guild_counters" ADD COLUMN "decay_time" varchar(64);

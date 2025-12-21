@@ -8,6 +8,7 @@ import {
 } from "#/types/modules";
 import { db, schema } from "../db";
 import { eq, and } from "drizzle-orm";
+import { makeDuration } from "#/configParser";
 
 export async function applyGuildSettings(
   guildId: Snowflake,
@@ -125,6 +126,28 @@ export async function applyCounters(
 
     console.log(`Inserting new counter: ${counterName}`);
 
+    const optionalProps: {
+      decayTime: string | null;
+      decayAmount: number | null;
+      lastDecayAt: Date | null;
+    } = {
+      decayTime: null,
+      decayAmount: null,
+      lastDecayAt: null,
+    };
+
+    if (counters[counterName]!.decay) {
+      console.log("Setting decay values for new counter");
+      optionalProps["decayTime"] = counters[counterName]!.decay.interval;
+      optionalProps["decayAmount"] = counters[counterName]!.decay.amount;
+      optionalProps["lastDecayAt"] = new Date(
+        Date.now() +
+          (
+            await makeDuration(counters[counterName]!.decay.interval)
+          ).asMilliseconds(),
+      );
+    }
+
     const insertResult = await db
       .insert(schema.guildCounters)
       .values({
@@ -133,6 +156,7 @@ export async function applyCounters(
         counterName: counterName,
         perUser: counters[counterName]!.per_user,
         perChannel: counters[counterName]!.per_channel,
+        ...optionalProps,
       })
       .returning();
 
@@ -189,12 +213,37 @@ export async function handleOldCounter(
     }
   }
 
-  if (oldCounter.initial_value !== counter.initial_value) {
-    console.log(`Updating counter: ${counterName} initial value`);
+  if (
+    oldCounter.initial_value !== counter.initial_value ||
+    oldCounter.decay !== counter.decay
+  ) {
+    console.log(`Updating counter: ${counterName} initial value and or decay`);
+
+    const optionalProps: {
+      decayTime: string | null;
+      decayAmount: number | null;
+      lastDecayAt: Date | null;
+    } = {
+      decayTime: null,
+      decayAmount: null,
+      lastDecayAt: null,
+    };
+
+    if (counter.decay) {
+      console.log("Decay values exist for old counter update");
+      optionalProps["decayTime"] = counter.decay.interval;
+      optionalProps["decayAmount"] = counter.decay.amount;
+      optionalProps["lastDecayAt"] = new Date(
+        Date.now() +
+          (await makeDuration(counter.decay.interval)).asMilliseconds(),
+      );
+    }
+
     await db
       .update(schema.guildCounters)
       .set({
         initialValue: counter.initial_value,
+        ...optionalProps,
       })
       .where(eq(schema.guildCounters.uuid, counterDb.uuid));
   }

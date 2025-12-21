@@ -35,26 +35,28 @@ export async function processCounterTrigger(trigger: CounterTriggerEvent) {
       continue;
     }
 
-    if (!ruleConfig?.triggers.counter_trigger) {
-      continue;
-    }
+    for await (const triggerConfig of ruleConfig.triggers) {
+      if (!triggerConfig.counter_trigger) {
+        continue;
+      }
 
-    if (
-      !(
-        ruleConfig.triggers.counter_trigger.counter === trigger.counter_name &&
-        ruleConfig.triggers.counter_trigger.trigger === trigger.trigger_name
-      )
-    ) {
-      continue;
-    }
+      if (
+        !(
+          triggerConfig.counter_trigger.counter === trigger.counter_name &&
+          triggerConfig.counter_trigger.trigger === trigger.trigger_name
+        )
+      ) {
+        continue;
+      }
 
-    console.log(
-      `Triggering automod actions on ${rule} because of counter_trigger event from ${trigger.counter_name} with trigger ${trigger.trigger_name}`,
-    );
-    await handleAutomodActions(
-      ruleConfig.actions,
-      trigger.user_id,
-      trigger.guild_id,
-    );
+      console.log(
+        `Triggering automod actions on ${rule} because of counter_trigger event from ${trigger.counter_name} with trigger ${trigger.trigger_name}`,
+      );
+      await handleAutomodActions(
+        ruleConfig.actions,
+        trigger.user_id,
+        trigger.guild_id,
+      );
+    }
   }
 }

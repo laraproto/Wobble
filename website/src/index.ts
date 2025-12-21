@@ -36,6 +36,8 @@ const apiInit = async () => {
     return;
   }
 
+  await import("#modules/cron");
+
   const { startBotChildProcess } = await import("#modules/bot");
 
   const botStarted = await startBotChildProcess(server.url, Bun.main);
@@ -45,6 +47,7 @@ const apiInit = async () => {
 
 switch (process.argv[2] === "bot") {
   case true:
+    //eslint-disable-next-line no-case-declarations
     const { botInit } = await import("@wobble/bot");
     if (await botInit()) {
       console.log("🤖 Bot initialized successfully.");

@@ -1,0 +1,1 @@
+ALTER TABLE "guild_counters" DROP COLUMN "decay_time";

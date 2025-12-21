@@ -68,6 +68,9 @@ export const guildCounters = pgTable("guild_counters", {
   counterName: text("counter_name").notNull().unique(),
   perUser: boolean("per_user").notNull().default(false),
   perChannel: boolean("per_channel").notNull().default(true),
+  decayTime: varchar("decay_time", { length: 64 }),
+  decayAmount: integer("decay_amount"),
+  lastDecayAt: timestamp("last_decay_at", { withTimezone: true }),
   ...timeData,
 });
 

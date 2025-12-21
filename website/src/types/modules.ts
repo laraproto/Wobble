@@ -8,6 +8,8 @@ import { zodSnowflake } from "./discord";
 // need to see if zod has anything built in to allow me to generate something like this
 
 export const operationParsingRegex = /^\s*(>=|<=|=|>|<)\s*(\d+)\s*$/;
+export const durationParsingRegex =
+  /^((?:\d+(?:\.\d+)?|\.\d+))\s*(mo|y|w|d|h|m|s)$/i;
 
 function plugin<T extends z.ZodObject>(schema: T) {
   return z
@@ -93,6 +95,12 @@ export const baseCounterObjectSchema = z.object({
       condition: z.string().regex(operationParsingRegex),
     }),
   ),
+  decay: z
+    .object({
+      amount: z.number().min(1).default(1),
+      interval: z.string().regex(durationParsingRegex),
+    })
+    .optional(),
 });
 
 export const baseCountersSchema = z.object({
@@ -110,20 +118,22 @@ const countersSchema = plugin(baseCountersSchema);
 
 export const baseAutomodRuleObjectSchema = z.object({
   enabled: z.boolean().default(true),
-  triggers: z.object({
-    automod_trigger: z
-      .object({
-        ruleId: zodSnowflake,
-      })
-      .optional(),
-    //This can only have one counter as input, need to fix that later
-    counter_trigger: z
-      .object({
-        counter: z.string(),
-        trigger: z.string(),
-      })
-      .optional(),
-  }),
+  triggers: z.array(
+    z.object({
+      automod_trigger: z
+        .object({
+          ruleId: zodSnowflake,
+        })
+        .optional(),
+      //This can only have one counter as input, need to fix that later
+      counter_trigger: z
+        .object({
+          counter: z.string(),
+          trigger: z.string(),
+        })
+        .optional(),
+    }),
+  ),
   actions: z
     .object({
       warn: z
@@ -187,6 +197,37 @@ export type BaseAutomodRuleObjectSchema = z.infer<
 export type BaseAutomodSchema = z.infer<typeof baseAutomodSchema>;
 
 export const automodSchema = plugin(baseAutomodSchema);
+
+export const baseCasesSchema = z.object({
+  logAutomaticActions: z.boolean().default(true),
+  casesChannel: zodSnowflake.optional(),
+  caseColors: z
+    .object({
+      ban: z.string().default("#f23a15"),
+      unban: z.string().default("#96f215"),
+      note: z.string().default("#6c6d6b"),
+      warn: z.string().default("#f7eb04"),
+      kick: z.string().default("#f78a04"),
+      mute: z.string().default("#f7aa04"),
+      unmute: z.string().default("#9af704"),
+      deleted: z.string().default("#04f796"),
+      softban: z.string().default("#04f7ef"),
+    })
+    .optional(),
+  caseIcons: z
+    .object({
+      ban: z.string().default("🔨"),
+      unban: z.string().default("❌🔨"),
+      note: z.string().default("📝"),
+      warn: z.string().default("⚠️"),
+      kick: z.string().default("🥾"),
+      mute: z.string().default("🔇"),
+      unmute: z.string().default("🔊"),
+      deleted: z.string().default("❌📝"),
+      softban: z.string().default("🥾🔨"),
+    })
+    .optional(),
+});
 
 export const pluginsSchema = z.object({
   modActions: modActionsSchema,

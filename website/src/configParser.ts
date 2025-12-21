@@ -1,7 +1,10 @@
 import {
   operationParsingRegex,
+  durationParsingRegex,
   type ConfigValidatorSchema,
 } from "./types/modules";
+
+import moment from "moment";
 
 export async function parseNumberCondition(
   condition: string,
@@ -54,4 +57,17 @@ export async function parseConfig<T extends ConfigValidatorSchema>(
   }
 
   return finalConfig;
+}
+
+export async function makeDuration(duration: string) {
+  const result = durationParsingRegex.exec(duration);
+
+  if (!result || !result[1] || !result[2]) {
+    throw new Error("Invalid duration format");
+  }
+
+  const timeValue = parseFloat(result[1]);
+  const timeUnit = result[2] as moment.DurationInputArg2;
+
+  return moment.duration(timeValue, timeUnit);
 }

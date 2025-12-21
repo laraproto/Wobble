@@ -1,0 +1,1 @@
+ALTER TABLE "guild_counters" ADD COLUMN "last_decay_at" timestamp with time zone;
