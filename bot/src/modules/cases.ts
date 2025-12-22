@@ -1,4 +1,4 @@
-import trpc, { type RouterInput } from "#botModules/trpc";
+import trpc, { type RouterInput, type RouterOutput } from "#botModules/trpc";
 import { client } from "#botBase";
 import { checkLevel } from "./level";
 import { parseConfig } from "@wobble/website/configParser";
@@ -15,22 +15,26 @@ import {
 import handlebars from "handlebars";
 
 type CasesCreateInput = RouterInput["bot"]["plugins"]["cases"]["createCase"];
+export type CasesCreateOutput =
+  RouterOutput["bot"]["plugins"]["cases"]["createCase"];
 
-export async function createCase(input: CasesCreateInput): Promise<void> {
+export async function createCase(
+  input: CasesCreateInput,
+): Promise<CasesCreateOutput | null> {
   const guildSettings = client.guildConfig!.get(input.guildId);
 
   if (!guildSettings) {
-    return;
+    return null;
   }
 
   if (!guildSettings.plugins.cases) {
-    return;
+    return null;
   }
 
   let casePlugin = guildSettings.plugins.cases.config;
 
   if (!casePlugin) {
-    return;
+    return null;
   }
 
   let level = 0;
@@ -41,7 +45,7 @@ export async function createCase(input: CasesCreateInput): Promise<void> {
   casePlugin = await parseConfig(guildSettings.plugins.cases, level);
 
   if (!casePlugin) {
-    return;
+    return null;
   }
 
   const guild = await client.guilds.fetch(input.guildId);
@@ -49,7 +53,7 @@ export async function createCase(input: CasesCreateInput): Promise<void> {
   const actualGuildUUID = await trpc.bot.checkGuild.query(input.guildId);
 
   if (!actualGuildUUID || !actualGuildUUID.guild) {
-    return;
+    return null;
   }
 
   const guildId = input.guildId;
@@ -127,6 +131,8 @@ export async function createCase(input: CasesCreateInput): Promise<void> {
   }
 
   await handleCaseDM({ ...input, guildId: guildId });
+
+  return result;
 }
 
 export async function handleCaseDM(input: CasesCreateInput): Promise<void> {

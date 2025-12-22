@@ -2,8 +2,9 @@ import { type BotCommand } from "#botBase";
 import { SlashCommandBuilder, MessageFlags } from "discord.js";
 import { type BaseModActionsSchema } from "#/types/modules";
 import handlebars from "handlebars";
-import { createCase } from "#botModules/cases";
+import { createCase, type CasesCreateOutput } from "#botModules/cases";
 import { makeDuration } from "@wobble/website/configParser";
+import trpc from "#botModules/trpc";
 
 export default {
   data: new SlashCommandBuilder()
@@ -57,13 +58,31 @@ export default {
       guildName: interaction.guild?.name,
     });
 
-    await createCase({
-      caseType: "ban",
-      guildId: interaction.guild!.id,
-      creatorId: interaction.user.id,
-      targetId: target.id,
-      reason,
-    });
+    let banCase: CasesCreateOutput | null = null;
+    if (!duration) {
+      banCase = await createCase({
+        caseType: "ban",
+        guildId: interaction.guild!.id,
+        creatorId: interaction.user.id,
+        targetId: target.id,
+        reason,
+      });
+    } else {
+      banCase = await createCase({
+        caseType: "ban",
+        guildId: interaction.guild!.id,
+        creatorId: interaction.user.id,
+        targetId: target.id,
+        reason: `(Banned for ${(await makeDuration(duration)).humanize()})${reason}`,
+      });
+    }
+
+    if (!banCase || !banCase.data) {
+      await interaction.reply({
+        content: "Failed to create ban case.",
+        flags: MessageFlags.Ephemeral,
+      });
+    }
 
     const deleteMoment = await makeDuration(deleteDuration);
 
@@ -85,21 +104,24 @@ export default {
     }
 
     setTimeout(async () => {
-      if (!duration) {
-        await interaction.guild!.members.ban(target, {
-          reason: message,
-          deleteMessageSeconds: deleteMoment.seconds(),
-        });
-      } else {
-        await interaction.guild!.members.ban(target, {
-          reason: message,
-          deleteMessageSeconds: deleteMoment.seconds(),
-        });
-      }
+      await interaction.guild!.members.ban(target, {
+        reason: message,
+        deleteMessageSeconds: deleteMoment.seconds(),
+      });
     }, 3000);
 
+    await trpc.bot.plugins.modActions.createBan.mutate({
+      guildId: interaction.guild!.id,
+      targetId: target.id,
+      duration: duration
+        ? (await makeDuration(duration)).milliseconds()
+        : undefined,
+      caseId: banCase!.data!.uuid,
+      reason: reason,
+    });
+
     await interaction.reply({
-      content: `Kicked ${target.tag} from the server`,
+      content: `Banned ${target.tag} from the server`,
     });
   },
 } as BotCommand;

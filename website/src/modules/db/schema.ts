@@ -131,7 +131,7 @@ export const guildBan = pgTable("guild_bans", {
     .references(() => guildCases.uuid, { onDelete: "cascade" })
     .notNull(),
   targetId: varchar("target_id", { length: 256 }).notNull(),
-  authorId: varchar("banner_id", { length: 256 }).notNull(),
+  authorId: varchar("banner_id", { length: 256 }),
   reason: text("reason"),
   expiresAt: timestamp("expires_at", { withTimezone: true }),
   ...timeData,

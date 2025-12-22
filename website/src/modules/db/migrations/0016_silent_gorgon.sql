@@ -1,0 +1,1 @@
+ALTER TABLE "guild_bans" ALTER COLUMN "banner_id" DROP NOT NULL;

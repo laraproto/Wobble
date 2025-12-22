@@ -1,7 +1,8 @@
 import cron from "node-cron";
 import { db, schema } from "../db";
-import { eq, isNotNull, and } from "drizzle-orm";
+import { eq, isNotNull, and, lte } from "drizzle-orm";
 import { makeDuration } from "#/configParser";
+import { sendEvent } from "#routes/websocket/index.ts";
 
 // Counter decay
 cron.schedule("* * * * *", async () => {
@@ -52,6 +53,44 @@ cron.schedule("* * * * *", async () => {
           lastDecayAt: new Date(),
         })
         .where(eq(schema.guildCounters.uuid, counter.uuid));
+    }
+  }
+});
+
+cron.schedule("* * * * *", async () => {
+  const bans = await db.query.guildBan.findMany({
+    where: and(
+      isNotNull(schema.guildBan.expiresAt),
+      lte(schema.guildBan.expiresAt, new Date()),
+    ),
+  });
+
+  for await (const ban of bans) {
+    try {
+      const banDelete = await db
+        .delete(schema.guildBan)
+        .where(eq(schema.guildBan.uuid, ban.uuid))
+        .returning();
+
+      if (banDelete.length === 0) {
+        console.error(
+          `Failed to delete ban record for user ${ban.targetId} from guild ${ban.guildId}`,
+        );
+        continue;
+      }
+
+      await sendEvent("guildUnban", {
+        guildId: ban.guildId,
+        user_id: ban.targetId,
+        creator_id: undefined,
+        reason: `${ban.reason} (Automatic ban expiry)`,
+      });
+    } catch (err) {
+      console.error(
+        `Failed to unban user ${ban.targetId} from guild ${ban.guildId}:`,
+        err,
+      );
+      continue;
     }
   }
 });
