@@ -6,6 +6,7 @@ export const wsEvents = z.enum([
   "guildDestroy",
   "guildRefetch",
   "counterTrigger",
+  "unban",
 ]);
 
 export type WSEvents = z.infer<typeof wsEvents>;
@@ -26,11 +27,24 @@ export const counterTriggerEvent = z.object({
   user_id: zodSnowflake.optional(),
 });
 
+export const unbanEvent = z.object({
+  guild_id: zodSnowflake,
+  user_id: zodSnowflake,
+  creator_id: zodSnowflake.optional(),
+  reason: z.string(),
+});
+
 export type GuildIdEvent = z.infer<typeof guildIdEvent>;
 
 export type CounterTriggerEvent = z.infer<typeof counterTriggerEvent>;
 
-export const wsEventPayloads = z.union([guildIdEvent, counterTriggerEvent]);
+export type UnbanEvent = z.infer<typeof unbanEvent>;
+
+export const wsEventPayloads = z.union([
+  guildIdEvent,
+  counterTriggerEvent,
+  unbanEvent,
+]);
 
 export type WSEventPayloads = z.infer<typeof wsEventPayloads>;
 

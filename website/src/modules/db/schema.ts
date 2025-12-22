@@ -122,6 +122,21 @@ export const guildCases = pgTable("guild_cases", {
   ...timeData,
 });
 
+export const guildBan = pgTable("guild_bans", {
+  uuid: uuid("id").primaryKey().defaultRandom(),
+  guildId: uuid("guild_id")
+    .references(() => guild.uuid, { onDelete: "cascade" })
+    .notNull(),
+  caseId: uuid("case_id")
+    .references(() => guildCases.uuid, { onDelete: "cascade" })
+    .notNull(),
+  targetId: varchar("target_id", { length: 256 }).notNull(),
+  authorId: varchar("banner_id", { length: 256 }).notNull(),
+  reason: text("reason"),
+  expiresAt: timestamp("expires_at", { withTimezone: true }),
+  ...timeData,
+});
+
 export const sessionRelations = relations(session, ({ one }) => ({
   user: one(user, {
     fields: [session.userId],
