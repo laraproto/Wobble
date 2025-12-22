@@ -1,5 +1,5 @@
 import { type BotCommand } from "#botBase";
-import { SlashCommandBuilder, MessageFlags } from "discord.js";
+import { SlashCommandBuilder, MessageFlags, DiscordAPIError } from "discord.js";
 import { type BaseModActionsSchema } from "#/types/modules";
 import handlebars from "handlebars";
 import { createCase, type CasesCreateOutput } from "#botModules/cases";
@@ -8,7 +8,7 @@ import trpc from "#botModules/trpc";
 
 export default {
   data: new SlashCommandBuilder()
-    .setName("ban")
+    .setName("unban")
     .addUserOption((option) =>
       option
         .setName("target")
@@ -126,10 +126,21 @@ export default {
     }
 
     setTimeout(async () => {
-      await interaction.guild!.members.ban(target, {
-        reason: message,
-        deleteMessageSeconds: deleteMoment.seconds(),
-      });
+      try {
+        await interaction.guild!.members.ban(target, {
+          reason: message,
+          deleteMessageSeconds: deleteMoment.seconds(),
+        });
+      } catch (err) {
+        const apiError = err as DiscordAPIError;
+        if (apiError.code === 10007) {
+          // Unknown Member
+          await interaction.reply({
+            content: `User is not in this server`,
+          });
+          return;
+        }
+      }
     }, 3000);
 
     await trpc.bot.plugins.modActions.createBan.mutate({
