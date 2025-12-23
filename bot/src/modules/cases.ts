@@ -14,7 +14,8 @@ import {
 } from "discord.js";
 import handlebars from "handlebars";
 
-type CasesCreateInput = RouterInput["bot"]["plugins"]["cases"]["createCase"];
+export type CasesCreateInput =
+  RouterInput["bot"]["plugins"]["cases"]["createCase"];
 export type CasesCreateOutput =
   RouterOutput["bot"]["plugins"]["cases"]["createCase"];
 
