@@ -34,7 +34,7 @@ export const configValidatorSchema = z.object({
     .array(
       z.object({
         level: z.string(),
-        config: z.looseObject({}),
+        config: z.looseObject({}).partial(),
       }),
     )
     .optional(),

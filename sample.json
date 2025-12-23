@@ -1,0 +1,37 @@
+{
+  "levels": {
+    "831160603950317569": 100
+  },
+  "plugins": {
+    "modActions": {
+      "config": {},
+      "overrides": [
+        {
+          "level": ">=50",
+          "config": {
+            "can_note": true,
+            "can_warn": true,
+            "can_mute": true,
+            "can_kick": true,
+            "can_ban": true,
+            "can_unban": true,
+            "can_view": true,
+            "can_addcase": true,
+            "can_massunban": true,
+            "can_massban": true,
+            "can_massmute": true,
+            "can_hidecase": true,
+            "can_deletecase": true
+          }
+        }
+      ]
+    },
+    "cases": {
+      "config": {
+        "casesChannel": "1349823498205270078",
+        "caseColors": {},
+        "caseIcons": {}
+      }
+    }
+  }
+}

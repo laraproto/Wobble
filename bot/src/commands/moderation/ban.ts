@@ -26,7 +26,7 @@ export default {
     .addStringOption((option) =>
       option.setName("reason").setDescription("The reason for ban"),
     )
-    .setDescription("Kicks a user from the server"),
+    .setDescription("Bans a user from the server"),
   requiredPlugin: "modActions",
   guildOnly: true,
   async canExecute(plugin?: BaseModActionsSchema) {
