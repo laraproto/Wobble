@@ -5,5 +5,6 @@ import unban from "./unban";
 import addcase from "./addcase";
 import note from "./note";
 import warn from "./warn";
+import cases from "./cases";
 
-export default [kick, ban, unban, addcase, note, warn] as BotCommand[];
+export default [kick, ban, unban, addcase, note, warn, cases] as BotCommand[];

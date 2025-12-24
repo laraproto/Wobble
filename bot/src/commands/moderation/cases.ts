@@ -1,6 +1,7 @@
 import { type BotCommand } from "#botBase";
-import { SlashCommandBuilder } from "discord.js";
+import { MessageFlags, SlashCommandBuilder, EmbedBuilder } from "discord.js";
 import { type BaseModActionsSchema } from "#/types/modules";
+import type { CasesGetOutput } from "#botModules/cases";
 import trpc from "#botModules/trpc";
 
 export default {
@@ -9,7 +10,10 @@ export default {
     .addSubcommand((subcommand) =>
       subcommand
         .setName("server")
-        .setDescription("Get all cases issued in the server"),
+        .setDescription("Get all cases issued in the server")
+        .addNumberOption((option) =>
+          option.setName("page").setDescription("Page number"),
+        ),
     )
     .addSubcommand((subcommand) =>
       subcommand
@@ -20,6 +24,9 @@ export default {
             .setName("target")
             .setDescription("User to get cases of")
             .setRequired(true),
+        )
+        .addNumberOption((option) =>
+          option.setName("page").setDescription("Page number"),
         ),
     )
     .setDescription("Get cases"),
@@ -35,30 +42,60 @@ export default {
     return [true, ""];
   },
   async execute(interaction) {
-    const subcommand = await interaction.options.getSubcommand();
+    const subcommand = interaction.options.getSubcommand();
+    const page = interaction.options.getNumber("page") || 1;
+
+    const guildInfo = await trpc.bot.checkGuild.query(interaction.guild!.id);
+    if (!guildInfo || !guildInfo.guild) {
+      await interaction.reply({
+        content: "I do not know what this guild is",
+        flags: MessageFlags.Ephemeral,
+      });
+    }
 
     switch (subcommand) {
       case "server": {
         const cases = await trpc.bot.plugins.cases.getCases.query({
-          guildId: interaction.guild!.id,
+          guildId: guildInfo.guild!.uuid,
+          page,
         });
 
         if (!cases.data) {
           await interaction.reply({
-            content: "Somethign went wrong fetching cases.",
+            content: "Something went wrong fetching cases.",
           });
           return;
         }
 
-        if (cases.data.length === 0) {
+        if (cases.total === 0) {
           await interaction.reply({
             content: "No cases have been issued in this server.",
           });
           return;
+        } else if (cases.total !== 0 && cases.data.length === 0) {
+          await interaction.reply({
+            content: "No cases found on this page.",
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
         }
 
-        // I need to add a pagination system to cases with buttons to switch page, sometime soon hopefully but I can't code comfortably rn
+        await interaction.reply({ embeds: [await makeEmbed(cases, interaction.guild!.id, page, "server")] });
       }
+      
     }
   },
 } as BotCommand;
+
+async function makeEmbed(caseOutput: NonNullable<CasesGetOutput>, guildId: string, page: number, type: "server" | "user", userId?: string) {
+  
+  const caseData: NonNullable<CasesGetOutput["data"]> = caseOutput.data as NonNullable<CasesGetOutput["data"]>;
+  let casesList = "";
+  for await (const caseInfo of caseData) {
+    casesList += `**Case ${caseInfo.uuid}** - ${caseInfo.caseType.toUpperCase()} - Target: <@${caseInfo.targetId}> - ${caseInfo.creatorId ?`Moderator: <@${ caseInfo.creatorId }>` : "Automated action"} - [Post](https://discord.com/channels/${guildId}/${caseInfo.channelId}/${caseInfo.messageId}): ${caseInfo.reason}\n`;
+  }
+
+  return new EmbedBuilder().setTitle(type === "server" ?`Serverwide cases - Page ${page}` : `Cases for <@${userId}> - Page ${page}`).setDescription(casesList).setFooter({
+    text: `To view the next page, use /cases ${type} page:${page + 1} ${type === "user" && userId ? `target:<@${userId}>` : ""}`
+  });
+}

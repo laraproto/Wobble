@@ -18,6 +18,7 @@ export type CasesCreateInput =
   RouterInput["bot"]["plugins"]["cases"]["createCase"];
 export type CasesCreateOutput =
   RouterOutput["bot"]["plugins"]["cases"]["createCase"];
+export type CasesGetOutput = RouterOutput["bot"]["plugins"]["cases"]["getCases"];
 
 export async function createCase(
   input: CasesCreateInput,
@@ -117,6 +118,7 @@ export async function createCase(
   }
 
   if (channel && caseMessage) {
+    input.channelId = channel.id;
     input.messageId = caseMessage.id;
   }
 

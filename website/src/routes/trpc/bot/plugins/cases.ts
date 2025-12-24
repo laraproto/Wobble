@@ -8,7 +8,7 @@ const casesRouter = router({
   getCase: botProcedure
     .input(
       z.object({
-        guildId: zodSnowflake,
+        guildId: z.uuid(),
         caseId: z.uuid(),
       }),
     )
@@ -36,7 +36,7 @@ const casesRouter = router({
   getCasesByUser: botProcedure
     .input(
       z.object({
-        guildId: zodSnowflake,
+        guildId: z.uuid(),
         userId: zodSnowflake,
         page: z.number().min(1).default(1),
         pageSize: z.number().min(1).max(100).default(10),
@@ -80,7 +80,7 @@ const casesRouter = router({
   getCases: botProcedure
     .input(
       z.object({
-        guildId: zodSnowflake,
+        guildId: z.uuid(),
         page: z.number().min(1).default(1),
         pageSize: z.number().min(1).max(100).default(10),
       }),
