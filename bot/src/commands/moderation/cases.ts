@@ -81,13 +81,46 @@ export default {
         }
 
         await interaction.reply({ embeds: [await makeEmbed(cases, interaction.guild!.id, page, "server")] });
+
+        break;
       }
-      
+      case "user": {
+        const target = interaction.options.getUser("target", true);
+
+        const cases = await trpc.bot.plugins.cases.getCasesByUser.query({
+          guildId: guildInfo.guild!.uuid,
+          userId: target.id,
+          page,
+        })
+
+        if (!cases.data) {
+          await interaction.reply({
+            content: "Something went wrong fetching cases.",
+          });
+          return;
+        }
+
+        if (cases.total === 0) {
+          await interaction.reply({
+            content: "No cases have been issued for this user.",
+            allowedMentions: {} // Idk why I added this, maybe i'll add a ping to profile link or not
+          })
+        } else if (cases.total !== 0 && cases.data.length === 0) {
+          await interaction.reply({
+            content: "No cases found on this page.",
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+
+        await interaction.reply({ embeds: [await makeEmbed(cases, interaction.guild!.id, page, "user", target.id, target.tag)] });
+        break;
+      }
     }
   },
 } as BotCommand;
 
-async function makeEmbed(caseOutput: NonNullable<CasesGetOutput>, guildId: string, page: number, type: "server" | "user", userId?: string) {
+async function makeEmbed(caseOutput: NonNullable<CasesGetOutput>, guildId: string, page: number, type: "server" | "user", userId?: string, username?: string) {
   
   const caseData: NonNullable<CasesGetOutput["data"]> = caseOutput.data as NonNullable<CasesGetOutput["data"]>;
   let casesList = "";
@@ -95,7 +128,7 @@ async function makeEmbed(caseOutput: NonNullable<CasesGetOutput>, guildId: strin
     casesList += `**Case ${caseInfo.uuid}** - ${caseInfo.caseType.toUpperCase()} - Target: <@${caseInfo.targetId}> - ${caseInfo.creatorId ?`Moderator: <@${ caseInfo.creatorId }>` : "Automated action"} - [Post](https://discord.com/channels/${guildId}/${caseInfo.channelId}/${caseInfo.messageId}): ${caseInfo.reason}\n`;
   }
 
-  return new EmbedBuilder().setTitle(type === "server" ?`Serverwide cases - Page ${page}` : `Cases for <@${userId}> - Page ${page}`).setDescription(casesList).setFooter({
+  return new EmbedBuilder().setTitle(type === "server" ?`Serverwide cases - Page ${page}` : `Cases for ${username} - Page ${page}`).setDescription(casesList).setFooter({
     text: `To view the next page, use /cases ${type} page:${page + 1} ${type === "user" && userId ? `target:<@${userId}>` : ""}`
   });
 }
