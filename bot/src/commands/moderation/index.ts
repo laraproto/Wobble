@@ -7,6 +7,9 @@ import note from "./note";
 import warn from "./warn";
 import cases from "./cases";
 import editcase from "./editcase";
+import deletecase from "./deletecase";
+import mute from "./mute";
+import unmute from "./unmute";
 
 export default [
   kick,
@@ -17,4 +20,7 @@ export default [
   warn,
   cases,
   editcase,
+  deletecase,
+  mute,
+  unmute,
 ] as BotCommand[];
