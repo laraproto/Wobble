@@ -146,7 +146,7 @@ export const baseAutomodRuleObjectSchema = z.object({
         .optional(),
       mute: z
         .object({
-          duration: z.string().max(32).optional(),
+          duration: z.string().max(32),
           reason: z
             .string()
             .max(400)

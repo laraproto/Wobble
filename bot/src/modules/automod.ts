@@ -4,7 +4,7 @@ import { client } from "#botBase";
 import handlebars from "handlebars";
 import { createCase } from "./cases";
 import { checkLevel } from "./level";
-import { parseConfig } from "@wobble/website/configParser";
+import { makeDuration, parseConfig } from "@wobble/website/configParser";
 import trpc from "#botModules/trpc";
 
 export async function discordAutomodTrigger(
@@ -13,6 +13,10 @@ export async function discordAutomodTrigger(
   userId: string,
 ) {
   const guildSettings = client.guildConfig!.get(guildId);
+
+  const guildInfo = await trpc.bot.checkGuild.query(guildId);
+
+  if (!guildInfo.guild) return;
 
   if (!guildSettings) return;
 
@@ -49,7 +53,13 @@ export async function discordAutomodTrigger(
       console.log(
         `Triggering automod actions on ${rule} because of automod_trigger event from rule ID ${ruleId}`,
       );
-      await handleAutomodActions(rule, ruleConfig.actions, userId, guildId);
+      await handleAutomodActions(
+        rule,
+        ruleConfig.actions,
+        userId,
+        guildId,
+        guildInfo.guild.uuid,
+      );
     }
   }
 }
@@ -60,6 +70,7 @@ export async function handleAutomodActions(
   actions: BaseAutomodRuleObjectSchema["actions"],
   userId?: string,
   guildId?: string,
+  guildUUID?: string,
 ) {
   if (!actions) {
     return;
@@ -72,7 +83,7 @@ export async function handleAutomodActions(
 
   const guild = await client.guilds.fetch(guildId);
 
-  if (!guild) {
+  if (!guild || !guildUUID) {
     // Guild not found
     return;
   }
@@ -86,7 +97,7 @@ export async function handleAutomodActions(
   const user = await guild.members.fetch(userId);
 
   if (user) {
-    await userAutomodActions(ruleName, actions, user, guild);
+    await userAutomodActions(ruleName, actions, user, guild, guildUUID);
   }
 }
 
@@ -95,6 +106,7 @@ async function userAutomodActions(
   actions: BaseAutomodRuleObjectSchema["actions"],
   user: GuildMember,
   guild: Guild,
+  guildUUID: string,
 ) {
   if (!actions) {
     return;
@@ -143,7 +155,7 @@ async function userAutomodActions(
           ruleName,
         });
 
-        createCase({
+        await createCase({
           guildId: guild.id,
           caseType: "mute",
           targetId: user.id,
@@ -152,9 +164,77 @@ async function userAutomodActions(
         });
 
         await user.timeout(
-          muteAction.duration_seconds * 1000,
+          (await makeDuration(muteAction.duration)).asMilliseconds(),
           muteAction.reason,
         );
+
+        break;
+      }
+      case "kick": {
+        const kickAction = action as NonNullable<typeof actions.kick>;
+
+        const handlebarsTemplate = handlebars.compile(kickAction.reason, {
+          noEscape: true,
+        });
+
+        const reason = handlebarsTemplate({
+          ruleName,
+        });
+
+        await createCase({
+          guildId: guild.id,
+          caseType: "kick",
+          targetId: user.id,
+          creatorId: null,
+          reason,
+        });
+
+        await user.kick(kickAction.reason);
+
+        break;
+      }
+      case "ban": {
+        const banAction = action as NonNullable<typeof actions.ban>;
+
+        const handlebarsTemplate = handlebars.compile(banAction.reason, {
+          noEscape: true,
+        });
+
+        const reason = handlebarsTemplate({
+          ruleName,
+        });
+
+        const caseResult = await createCase({
+          guildId: guild.id,
+          caseType: "ban",
+          targetId: user.id,
+          creatorId: null,
+          reason,
+        });
+
+        if (!caseResult || !caseResult.data) return;
+
+        if (banAction.duration) {
+          const duration = await makeDuration(banAction.duration);
+
+          const result = await trpc.bot.plugins.modActions.createBan.mutate({
+            guildId: guildUUID,
+            targetId: user.id,
+            caseId: caseResult.data.uuid,
+            reason,
+            duration: duration.asMilliseconds(),
+          });
+
+          if (!result.success) {
+            console.log(`Failed to create timed ban: ${result.message}`);
+            return;
+          }
+
+          await user.ban({
+            reason: banAction.reason,
+            deleteMessageSeconds: 3600,
+          });
+        }
 
         break;
       }
@@ -170,6 +250,23 @@ async function userAutomodActions(
           user_id: user.id,
           channel_id: undefined,
         });
+
+        break;
+      }
+      case "remove_counter": {
+        const removeCounterAction = action as NonNullable<
+          typeof actions.remove_counter
+        >;
+
+        await trpc.bot.plugins.counters.decrementCounter.mutate({
+          guildId: guild.id,
+          counterName: removeCounterAction.counter,
+          value: removeCounterAction.value,
+          user_id: user.id,
+          channel_id: undefined,
+        });
+
+        break;
       }
     }
   }
