@@ -122,13 +122,17 @@ export default {
 
 async function makeEmbed(caseOutput: NonNullable<CasesGetOutput>, guildId: string, page: number, type: "server" | "user", userId?: string, username?: string) {
   
+  if (!caseOutput.pageTotal) {
+    return new EmbedBuilder().setTitle("No cases found");
+  }
+
   const caseData: NonNullable<CasesGetOutput["data"]> = caseOutput.data as NonNullable<CasesGetOutput["data"]>;
   let casesList = "";
   for await (const caseInfo of caseData) {
-    casesList += `**Case ${caseInfo.uuid}** - ${caseInfo.caseType.toUpperCase()} - Target: <@${caseInfo.targetId}> - ${caseInfo.creatorId ?`Moderator: <@${ caseInfo.creatorId }>` : "Automated action"} - [Post](https://discord.com/channels/${guildId}/${caseInfo.channelId}/${caseInfo.messageId}): ${caseInfo.reason}\n`;
+    casesList += `**Case ${caseInfo.uuid}** - ${caseInfo.caseType.toUpperCase()} ${type === "server" ? `- Target: <@${caseInfo.targetId}>` : ""} - ${caseInfo.creatorId ?`Moderator: <@${ caseInfo.creatorId }>` : "Automated action"} - [Post](https://discord.com/channels/${guildId}/${caseInfo.channelId}/${caseInfo.messageId}): ${caseInfo.reason}\n`;
   }
 
   return new EmbedBuilder().setTitle(type === "server" ?`Serverwide cases - Page ${page}` : `Cases for ${username} - Page ${page}`).setDescription(casesList).setFooter({
-    text: `To view the next page, use /cases ${type} page:${page + 1} ${type === "user" && userId ? `target:<@${userId}>` : ""}`
+    text: caseOutput.pageTotal > 1 ? `To view the next page, use /cases ${type} page:${page + 1} ${type === "user" && userId ? `target:<@${userId}>` : ""}` : "This is the only page of cases.",
   });
 }
