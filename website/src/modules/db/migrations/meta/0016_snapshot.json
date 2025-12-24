@@ -72,12 +72,8 @@
           "name": "guilds_owner_id_users_discord_id_fk",
           "tableFrom": "guilds",
           "tableTo": "users",
-          "columnsFrom": [
-            "owner_id"
-          ],
-          "columnsTo": [
-            "discord_id"
-          ],
+          "columnsFrom": ["owner_id"],
+          "columnsTo": ["discord_id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -87,9 +83,7 @@
         "guilds_guild_id_unique": {
           "name": "guilds_guild_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "guild_id"
-          ]
+          "columns": ["guild_id"]
         }
       },
       "policies": {},
@@ -163,12 +157,8 @@
           "name": "guild_bans_guild_id_guilds_id_fk",
           "tableFrom": "guild_bans",
           "tableTo": "guilds",
-          "columnsFrom": [
-            "guild_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["guild_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -176,12 +166,8 @@
           "name": "guild_bans_case_id_guild_cases_id_fk",
           "tableFrom": "guild_bans",
           "tableTo": "guild_cases",
-          "columnsFrom": [
-            "case_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["case_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -266,12 +252,8 @@
           "name": "guild_cases_guild_id_guilds_id_fk",
           "tableFrom": "guild_cases",
           "tableTo": "guilds",
-          "columnsFrom": [
-            "guild_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["guild_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -318,12 +300,8 @@
           "name": "guild_counter_trigger_counter_id_guild_counters_id_fk",
           "tableFrom": "guild_counter_trigger",
           "tableTo": "guild_counters",
-          "columnsFrom": [
-            "counter_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["counter_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -390,12 +368,8 @@
           "name": "guild_counter_values_counter_id_guild_counters_id_fk",
           "tableFrom": "guild_counter_values",
           "tableTo": "guild_counters",
-          "columnsFrom": [
-            "counter_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["counter_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -488,12 +462,8 @@
           "name": "guild_counters_guild_id_guilds_id_fk",
           "tableFrom": "guild_counters",
           "tableTo": "guilds",
-          "columnsFrom": [
-            "guild_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["guild_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -503,9 +473,7 @@
         "guild_counters_counter_name_unique": {
           "name": "guild_counters_counter_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "counter_name"
-          ]
+          "columns": ["counter_name"]
         }
       },
       "policies": {},
@@ -561,12 +529,8 @@
           "name": "session_user_id_users_id_fk",
           "tableFrom": "session",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -664,16 +628,12 @@
         "users_username_unique": {
           "name": "users_username_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "username"
-          ]
+          "columns": ["username"]
         },
         "users_discord_id_unique": {
           "name": "users_discord_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "discord_id"
-          ]
+          "columns": ["discord_id"]
         }
       },
       "policies": {},

@@ -3,6 +3,7 @@ import {
   type WSMessage,
   type GuildIdEvent,
   type CounterTriggerEvent,
+  type UnbanEvent,
 } from "#/types/ws";
 import trpc from "#botModules/trpc";
 import { client } from "#botBase";
@@ -96,6 +97,19 @@ async function processWSEvents(data: string) {
       const parsedEvent = parsedData.data as CounterTriggerEvent;
 
       await processCounterTrigger(parsedEvent);
+
+      break;
+    }
+    case "guildUnban": {
+      const parsedEvent = parsedData.data as UnbanEvent;
+      const guild = await client.guilds
+        .fetch(parsedEvent.guild_id)
+        .catch(() => null);
+      if (!guild) break;
+
+      await guild.bans
+        .remove(parsedEvent.user_id, `(Ban Expiry) ${parsedEvent.reason}`)
+        .catch(() => null);
 
       break;
     }

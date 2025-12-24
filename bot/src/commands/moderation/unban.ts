@@ -1,5 +1,5 @@
 import { type BotCommand } from "#botBase";
-import { SlashCommandBuilder, MessageFlags, DiscordAPIError } from "discord.js";
+import { SlashCommandBuilder, MessageFlags } from "discord.js";
 import { type BaseModActionsSchema } from "#/types/modules";
 import { createCase } from "#botModules/cases";
 import trpc from "#botModules/trpc";
@@ -44,7 +44,7 @@ export default {
 
     if (!alreadyBanned.ban) {
       interaction.reply({
-        content: `${target.tag} is not banned from this server.`,
+        content: `${target.username} is not banned from this server.`,
         flags: MessageFlags.Ephemeral,
       });
       return;
@@ -65,23 +65,14 @@ export default {
       });
     }
 
-    setTimeout(async () => {
-      try {
-        await interaction.guild!.members.unban(
-          target,
-          `Unbanned by ${interaction.user.tag}`,
-        );
-      } catch (err) {
-        const apiError = err as DiscordAPIError;
-        if (apiError.code === 10007) {
-          // Unknown Member
-          await interaction.reply({
-            content: `User is not in this server`,
-          });
-          return;
-        }
-      }
-    }, 3000);
+    await interaction
+      .guild!.bans.remove(target.id, `Unbanned by ${interaction.user.tag}`)
+      .then((user) =>
+        console.log(
+          `Unbanned ${user?.username} from ${interaction.guild!.name}`,
+        ),
+      )
+      .catch(console.error);
 
     await trpc.bot.plugins.modActions.deleteBan.mutate({
       guildId: getGuild.guild!.uuid,
@@ -89,7 +80,7 @@ export default {
     });
 
     await interaction.reply({
-      content: `Unbanned ${target.tag} from the server`,
+      content: `Unbanned ${target.username} from the server`,
     });
   },
 } as BotCommand;

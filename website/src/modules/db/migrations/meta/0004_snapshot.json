@@ -72,12 +72,8 @@
           "name": "guilds_owner_id_users_discord_id_fk",
           "tableFrom": "guilds",
           "tableTo": "users",
-          "columnsFrom": [
-            "owner_id"
-          ],
-          "columnsTo": [
-            "discord_id"
-          ],
+          "columnsFrom": ["owner_id"],
+          "columnsTo": ["discord_id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -87,9 +83,7 @@
         "guilds_guild_id_unique": {
           "name": "guilds_guild_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "guild_id"
-          ]
+          "columns": ["guild_id"]
         }
       },
       "policies": {},
@@ -145,12 +139,8 @@
           "name": "session_user_id_users_id_fk",
           "tableFrom": "session",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -248,16 +238,12 @@
         "users_username_unique": {
           "name": "users_username_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "username"
-          ]
+          "columns": ["username"]
         },
         "users_discord_id_unique": {
           "name": "users_discord_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "discord_id"
-          ]
+          "columns": ["discord_id"]
         }
       },
       "policies": {},

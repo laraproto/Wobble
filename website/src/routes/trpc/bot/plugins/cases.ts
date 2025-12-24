@@ -175,7 +175,7 @@ const casesRouter = router({
         return {
           success: true,
           message: "Case edited successfully.",
-          data: result,
+          data: result[0],
         };
       } catch (err) {
         return {

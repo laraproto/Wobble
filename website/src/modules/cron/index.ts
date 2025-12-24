@@ -3,6 +3,7 @@ import { db, schema } from "../db";
 import { eq, isNotNull, and, lte } from "drizzle-orm";
 import { makeDuration } from "#/configParser";
 import { sendEvent } from "#routes/websocket/index.ts";
+import type { UnbanEvent } from "#/types/ws";
 
 // Counter decay
 cron.schedule("* * * * *", async () => {
@@ -79,12 +80,25 @@ cron.schedule("* * * * *", async () => {
         continue;
       }
 
+      const guild = await db.query.guild.findFirst({
+        where: eq(schema.guild.uuid, ban.guildId),
+      });
+
+      if (!guild) {
+        console.log("This should not be possible!!!!");
+        continue;
+      }
+
       await sendEvent("guildUnban", {
-        guildId: ban.guildId,
+        guild_id: guild.guildId,
         user_id: ban.targetId,
         creator_id: undefined,
         reason: `${ban.reason} (Automatic ban expiry)`,
-      });
+      } as UnbanEvent);
+
+      console.log(
+        `Ending ban for user ${ban.targetId} from guild ${ban.guildId}`,
+      );
     } catch (err) {
       console.error(
         `Failed to unban user ${ban.targetId} from guild ${ban.guildId}:`,

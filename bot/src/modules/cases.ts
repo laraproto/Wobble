@@ -18,7 +18,8 @@ export type CasesCreateInput =
   RouterInput["bot"]["plugins"]["cases"]["createCase"];
 export type CasesCreateOutput =
   RouterOutput["bot"]["plugins"]["cases"]["createCase"];
-export type CasesGetOutput = RouterOutput["bot"]["plugins"]["cases"]["getCases"];
+export type CasesGetOutput =
+  RouterOutput["bot"]["plugins"]["cases"]["getCases"];
 
 export async function createCase(
   input: CasesCreateInput,
@@ -73,10 +74,13 @@ export async function createCase(
 
   let authorMember: GuildMember | null = null;
   if (input.creatorId) {
-    authorMember = await guild.members.fetch(input.creatorId);
+    authorMember = await guild.members.fetch(input.creatorId).catch(() => null);
   }
 
-  const targetMember = await guild.members.fetch(input.targetId);
+  const targetUser = await client.users.fetch(input.targetId).catch(() => null);
+  if (!targetUser) {
+    return null;
+  }
 
   let caseMessage: Message<true> | null = null;
 
@@ -99,7 +103,7 @@ export async function createCase(
     .addFields([
       {
         name: "User",
-        value: `${targetMember.user.tag} (${targetMember.id})`,
+        value: `${targetUser.tag} (${targetUser.id})`,
         inline: true,
       },
       {

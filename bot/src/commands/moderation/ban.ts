@@ -95,7 +95,7 @@ export default {
         guildId: interaction.guild!.id,
         creatorId: interaction.user.id,
         targetId: target.id,
-        reason: `(Banned for ${(await makeDuration(duration)).humanize()})${reason}`,
+        reason: `(Banned for ${(await makeDuration(duration)).humanize()}) ${reason}`,
       });
     }
 
@@ -126,7 +126,7 @@ export default {
     }
 
     setTimeout(async () => {
-      await interaction.guild!.members.ban(target, {
+      await interaction.guild!.members.ban(target.id, {
         reason: message,
         deleteMessageSeconds: deleteMoment.seconds(),
       });
@@ -136,7 +136,7 @@ export default {
       guildId: getGuild.guild!.uuid,
       targetId: target.id,
       duration: duration
-        ? (await makeDuration(duration)).milliseconds()
+        ? (await makeDuration(duration)).asMilliseconds()
         : undefined,
       caseId: banCase!.data!.uuid,
       reason: reason,
