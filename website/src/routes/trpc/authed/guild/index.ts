@@ -7,6 +7,7 @@ import { applyGuildSettings } from "#modules/guild/index.ts";
 
 import guildCasesRouter from "./plugins/cases";
 import guildModActionsRouter from "./plugins/modActions";
+import guildLevelsRouter from "./plugins/levels";
 
 const guildRouter = router({
   refreshGuild: guildProcedure.mutation(async ({ input }) => {
@@ -100,6 +101,7 @@ const guildRouter = router({
   }),
   cases: guildCasesRouter,
   modActions: guildModActionsRouter,
+  levels: guildLevelsRouter,
 });
 
 export default guildRouter;

@@ -16,6 +16,7 @@ import {
   Gavel,
   UserRound,
   Notebook,
+  FlaskConical,
 } from "lucide-react";
 
 import { Link } from "wouter";
@@ -71,6 +72,14 @@ export function DashboardSidebarContent() {
                 <Link href={`/${dashboardContext.guild.uuid}/cases`}>
                   <Notebook />
                   Cases
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <Link href={`/${dashboardContext.guild.uuid}/levels`}>
+                  <FlaskConical />
+                  Levels
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

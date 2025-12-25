@@ -8,6 +8,7 @@ import { Users } from "./general/Users";
 
 import { Cases } from "./plugins/Cases";
 import { ModActions } from "./plugins/ModActions";
+import { Levels } from "./plugins/Levels";
 
 export function GuildBase() {
   const params = useParams();
@@ -32,6 +33,7 @@ export function GuildBase() {
       )}
       <Route path="/cases" component={Cases} />
       <Route path="/moderation" component={ModActions} />
+      <Route path="/levels" component={Levels} />
       <Route path="/">
         <h1 className="text-3xl font-bold">
           Guild Dashboard for {params.guild}

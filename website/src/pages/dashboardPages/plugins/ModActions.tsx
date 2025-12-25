@@ -682,7 +682,7 @@ export function ModActions() {
                             newOpenStates[index] = isOpen;
                             setOpenCollapsibles(newOpenStates);
                           }}
-                          className="flex flex-col -ml-4 border rounded-md w-full bg-muted gap-2 mb-2"
+                          className="flex flex-col border rounded-md w-full bg-muted gap-2 mb-2"
                         >
                           <div className="ml-2 flex items-center justify-between">
                             <h4 className="text-sm font-semibold">
@@ -724,6 +724,10 @@ export function ModActions() {
                                           }
                                           aria-invalid={isInvalid}
                                         />
+                                        <FieldDescription>
+                                          Allowed operators are &gt;, &gt;=,
+                                          &lt;, &lt;=, =
+                                        </FieldDescription>
                                         {isInvalid && (
                                           <FieldError
                                             errors={field.state.meta.errors}

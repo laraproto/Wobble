@@ -316,6 +316,8 @@ export function Installer() {
                         <FieldDescription className="text-left">
                           Allow users to freely register and start using the
                           bot, otherwise invite codes will need to be given out
+                          (This probably won&apos;t do anything until a commit
+                          after the 28th of December 2025)
                         </FieldDescription>
                       </FieldContent>
                       {isInvalid && (
