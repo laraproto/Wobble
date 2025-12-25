@@ -186,7 +186,7 @@ export function Levels() {
                                     return (
                                       <Field data-invalid={isInvalid}>
                                         <FieldLabel htmlFor={field.name}>
-                                          Role or User ID
+                                          Perm Level
                                         </FieldLabel>
                                         <Input
                                           id={field.name}

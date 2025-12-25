@@ -114,7 +114,7 @@ export type BaseCountersSchema = z.infer<typeof baseCountersSchema>;
 
 export type BaseCounterObjectSchema = z.infer<typeof baseCounterObjectSchema>;
 
-const countersSchema = plugin(baseCountersSchema);
+export const countersSchema = plugin(baseCountersSchema);
 
 export const baseAutomodRuleObjectSchema = z.object({
   enabled: z.boolean().default(true),

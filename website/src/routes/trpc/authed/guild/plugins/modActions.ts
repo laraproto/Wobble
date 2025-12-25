@@ -66,8 +66,6 @@ const guildModActionsRouter = router({
         },
       });
 
-      console.log(botConfigParse.data?.plugins.modActions);
-
       if (!botConfigParse.success) {
         return {
           success: false,
