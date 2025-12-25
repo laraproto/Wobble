@@ -4,7 +4,9 @@ import { guildProcedure, router } from "#modules/trpc";
 import { sendEvent } from "#routes/websocket/index.ts";
 import { parseConfig } from "#/configParser";
 import { applyGuildSettings } from "#modules/guild/index.ts";
+
 import guildCasesRouter from "./plugins/cases";
+import guildModActionsRouter from "./plugins/modActions";
 
 const guildRouter = router({
   refreshGuild: guildProcedure.mutation(async ({ input }) => {
@@ -97,6 +99,7 @@ const guildRouter = router({
     return ctx.guild.settings;
   }),
   cases: guildCasesRouter,
+  modActions: guildModActionsRouter,
 });
 
 export default guildRouter;

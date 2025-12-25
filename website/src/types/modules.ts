@@ -83,7 +83,7 @@ export const baseModActionsSchema = z.object({
 
 export type BaseModActionsSchema = z.infer<typeof baseModActionsSchema>;
 
-const modActionsSchema = plugin(baseModActionsSchema);
+export const modActionsSchema = plugin(baseModActionsSchema);
 
 export const baseCounterObjectSchema = z.object({
   per_channel: z.boolean().default(false),

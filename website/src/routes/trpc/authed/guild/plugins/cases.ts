@@ -2,8 +2,6 @@ import { z } from "zod";
 import { zodSnowflake } from "#/types/discord";
 import { botConfigSchema, casesSchema } from "#/types/modules";
 import { guildProcedure, router } from "#modules/trpc";
-import { db, schema } from "#modules/db/index.ts";
-import { eq } from "drizzle-orm";
 import { applyGuildSettings } from "#modules/guild/index.ts";
 
 const casesFormSchema = z.object({

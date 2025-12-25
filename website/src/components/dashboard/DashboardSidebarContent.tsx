@@ -9,7 +9,14 @@ import {
   SidebarGroupContent,
 } from "#/components/ui/sidebar";
 
-import { LayoutDashboard, Bean, Bot, Gavel, UserRound, Notebook } from "lucide-react";
+import {
+  LayoutDashboard,
+  Bean,
+  Bot,
+  Gavel,
+  UserRound,
+  Notebook,
+} from "lucide-react";
 
 import { Link } from "wouter";
 
@@ -72,6 +79,14 @@ export function DashboardSidebarContent() {
                 <Link href={`/${dashboardContext.guild.uuid}/moderation`}>
                   <Gavel />
                   Mod Actions
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <Link href={`/${dashboardContext.guild.uuid}/counters`}>
+                  <Bean />
+                  Counters
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

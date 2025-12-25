@@ -18,11 +18,10 @@ export default {
   guildOnly: true,
   async canExecute(plugin?: BaseModActionsSchema) {
     if (!plugin) return [false, "Plugin is not configured"];
-    if (!plugin.can_addcase)
-      // No edit permission lmao, i cba to add a new one
+    if (!plugin.can_deletecase)
       return [
         false,
-        "You do not meet the level conditions for editing cases or editing is disabled",
+        "You do not meet the level conditions for deleting cases or deleting is disabled",
       ];
     return [true, ""];
   },
