@@ -6,6 +6,9 @@ import { Overview } from "./general/Overview";
 import { Debug } from "./general/Debug";
 import { Users } from "./general/Users";
 
+import { Cases } from "./plugins/Cases";
+import { ModActions } from "./plugins/ModActions";
+
 export function GuildBase() {
   const params = useParams();
   const dashboardContext = useDashboard();
@@ -22,9 +25,13 @@ export function GuildBase() {
     <>
       <Route path="/overview" component={Overview} />
       <Route path="/users" component={Users} />
-      {dashboardContext.configuration.development && (
+      {dashboardContext.configuration.development ? (
         <Route path="/debug" component={Debug} />
+      ) : (
+        <Redirect to="/overview" />
       )}
+      <Route path="/cases" component={Cases} />
+      <Route path="/moderation" component={ModActions} />
       <Route path="/">
         <h1 className="text-3xl font-bold">
           Guild Dashboard for {params.guild}

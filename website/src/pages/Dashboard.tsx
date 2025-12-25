@@ -8,7 +8,7 @@ import { GuildBase } from "./dashboardPages/GuildBase";
 import { Suspense } from "react";
 
 export function Dashboard() {
-  const [location, navigate] = useLocation();
+  const [, navigate] = useLocation();
 
   const configurationQuery = useQuery(trpc.configuration.queryOptions());
 

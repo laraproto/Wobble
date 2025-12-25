@@ -200,7 +200,7 @@ export const automodSchema = plugin(baseAutomodSchema);
 
 export const baseCasesSchema = z.object({
   logAutomaticActions: z.boolean().default(true),
-  casesChannel: zodSnowflake.optional(),
+  casesChannel: zodSnowflake.default(""),
   caseColors: z
     .object({
       ban: z.string().default("#f23a15"),
@@ -231,7 +231,7 @@ export const baseCasesSchema = z.object({
 
 export type BaseCasesSchema = z.infer<typeof baseCasesSchema>;
 
-const casesSchema = plugin(baseCasesSchema);
+export const casesSchema = plugin(baseCasesSchema);
 
 export const pluginsSchema = z.object({
   modActions: modActionsSchema,

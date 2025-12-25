@@ -1,10 +1,10 @@
 import { publicProcedure, authedProcedure, router } from "#modules/trpc";
 import * as auth from "#modules/auth";
-import { z } from "zod";
+//import { z } from "zod";
 import { db } from "#/modules/db";
 import { discordKy } from "#/kyInstance";
 import {
-  PermissionFlagsBits,
+  //PermissionFlagsBits,
   type APIPartialGuild,
 } from "discord-api-types/v10";
 
@@ -33,7 +33,7 @@ const currentUserRouter = router({
       where: (guild, { eq }) => eq(guild.ownerId, ctx.user.discordId),
     });
 
-    let guilds: {
+    const guilds: {
       id: string;
       name: string;
       permissions: number;
@@ -46,7 +46,7 @@ const currentUserRouter = router({
 
     for (const guild of userGuilds) {
       if (
-        !!(BigInt(guild.permissions) & PermissionFlagsBits.ManageGuild) ||
+        //!!(BigInt(guild.permissions) & PermissionFlagsBits.ManageGuild) ||
         guild.owner
       ) {
         // Might actually be faster to do a sql query for each instead of loop in a loop

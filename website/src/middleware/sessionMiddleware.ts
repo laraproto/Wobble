@@ -64,6 +64,7 @@ const sessionMiddleware = createMiddleware<{
   c.set("session", authSession);
   if (user) c.set("user", user);
 
+  // This code doesn't work but idc
   const expiresSeconds = authSession.expiresAt.getTime() - Date.now();
   if (authCookie && user && expiresSeconds < auth.DAY_IN_MS * 7) {
     const newExpiresAt = new Date(Date.now() + auth.DAY_IN_MS * 30);

@@ -134,13 +134,16 @@ async function userAutomodActions(
           ruleName,
         });
 
-        createCase({
-          guildId: guild.id,
-          caseType: "warn",
-          targetId: user.id,
-          creatorId: null,
-          reason,
-        });
+        createCase(
+          {
+            guildId: guild.id,
+            caseType: "warn",
+            targetId: user.id,
+            creatorId: null,
+            reason,
+          },
+          true,
+        );
 
         break;
       }
@@ -155,13 +158,16 @@ async function userAutomodActions(
           ruleName,
         });
 
-        await createCase({
-          guildId: guild.id,
-          caseType: "mute",
-          targetId: user.id,
-          creatorId: null,
-          reason,
-        });
+        await createCase(
+          {
+            guildId: guild.id,
+            caseType: "mute",
+            targetId: user.id,
+            creatorId: null,
+            reason,
+          },
+          true,
+        );
 
         await user.timeout(
           (await makeDuration(muteAction.duration)).asMilliseconds(),
@@ -181,13 +187,16 @@ async function userAutomodActions(
           ruleName,
         });
 
-        await createCase({
-          guildId: guild.id,
-          caseType: "kick",
-          targetId: user.id,
-          creatorId: null,
-          reason,
-        });
+        await createCase(
+          {
+            guildId: guild.id,
+            caseType: "kick",
+            targetId: user.id,
+            creatorId: null,
+            reason,
+          },
+          true,
+        );
 
         await user.kick(kickAction.reason);
 
@@ -204,13 +213,16 @@ async function userAutomodActions(
           ruleName,
         });
 
-        const caseResult = await createCase({
-          guildId: guild.id,
-          caseType: "ban",
-          targetId: user.id,
-          creatorId: null,
-          reason,
-        });
+        const caseResult = await createCase(
+          {
+            guildId: guild.id,
+            caseType: "ban",
+            targetId: user.id,
+            creatorId: null,
+            reason,
+          },
+          true,
+        );
 
         if (!caseResult || !caseResult.data) return;
 

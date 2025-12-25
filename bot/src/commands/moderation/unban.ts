@@ -50,13 +50,16 @@ export default {
       return;
     }
 
-    const unbanCase = await createCase({
-      caseType: "unban",
-      guildId: interaction.guild!.id,
-      creatorId: interaction.user.id,
-      targetId: target.id,
-      reason: `(UNBAN) ${alreadyBanned.ban.reason}`,
-    });
+    const unbanCase = await createCase(
+      {
+        caseType: "unban",
+        guildId: interaction.guild!.id,
+        creatorId: interaction.user.id,
+        targetId: target.id,
+        reason: `(UNBAN) ${alreadyBanned.ban.reason}`,
+      },
+      false,
+    );
 
     if (!unbanCase || !unbanCase.data) {
       await interaction.reply({

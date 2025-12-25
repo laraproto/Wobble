@@ -112,7 +112,6 @@ export function Debug() {
 
                     if (parseResult.success) {
                       toast.success(parseResult.message, {
-                        description: JSON.stringify(parseResult.guild),
                         closeButton: true,
                       });
                     } else {
@@ -131,14 +130,13 @@ export function Debug() {
 
                     if (pullResult.data) {
                       toast.success("Config pulled", {
-                        description: JSON.stringify(pullResult.data),
                         closeButton: true,
                       });
                       setTestParse(JSON.stringify(pullResult.data, null, 2));
                     }
                   }}
                 >
-                  Pull config (not functional)
+                  Pull config
                 </Button>
               </div>
             </div>

@@ -8,17 +8,16 @@ import {
   CardFooter,
 } from "#/components/ui/card";
 
-export function Overview() {
+export function ModActions() {
   const dashboardContext = useDashboard();
 
   return (
     <div className="container mx-auto relative">
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">Overview</CardTitle>
+          <CardTitle className="text-2xl font-bold">Mod Actions</CardTitle>
           <CardDescription>
-            Initially this description was something not very quirky so I
-            deleted it, might replace it with something else
+            Configure mod actions module
           </CardDescription>
           <CardContent>
             <h1 className="text-3xl font-bold">THIS PAGE IS INCOMPLETE</h1>

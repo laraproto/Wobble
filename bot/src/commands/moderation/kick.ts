@@ -46,13 +46,16 @@ export default {
       guildName: interaction.guild?.name,
     });
 
-    await createCase({
-      caseType: "kick",
-      guildId: interaction.guild!.id,
-      creatorId: interaction.user.id,
-      targetId: target.id,
-      reason,
-    });
+    await createCase(
+      {
+        caseType: "kick",
+        guildId: interaction.guild!.id,
+        creatorId: interaction.user.id,
+        targetId: target.id,
+        reason,
+      },
+      false,
+    );
 
     setTimeout(async () => {
       await interaction.guild!.members.kick(target, message);

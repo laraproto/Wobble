@@ -1,4 +1,4 @@
-import { useDashboard } from "#/components/dashboard/DashboardSidebar";
+//import { useDashboard } from "#/components/dashboard/DashboardSidebar";
 import {
   Card,
   CardDescription,
@@ -9,7 +9,7 @@ import {
 } from "#/components/ui/card";
 
 export function Users() {
-  const dashboardContext = useDashboard();
+  //const dashboardContext = useDashboard();
 
   return (
     <div className="container mx-auto relative">
@@ -19,7 +19,9 @@ export function Users() {
           <CardDescription>
             Revoke or add access to dashboard users
           </CardDescription>
-          <CardContent></CardContent>
+          <CardContent>
+            <h1 className="text-3xl font-bold">THIS PAGE IS INCOMPLETE</h1>
+          </CardContent>
           <CardFooter></CardFooter>
         </CardHeader>
       </Card>

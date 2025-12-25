@@ -46,7 +46,7 @@ const installerSchema = z.object({
 
 export function Installer() {
   const installerMutation = useMutation(trpc.installer.set.mutationOptions({}));
-  const [location, navigate] = useLocation();
+  const [, navigate] = useLocation();
 
   const form = useForm({
     defaultValues: {

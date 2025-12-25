@@ -23,6 +23,7 @@ export type CasesGetOutput =
 
 export async function createCase(
   input: CasesCreateInput,
+  automatic: boolean,
 ): Promise<CasesCreateOutput | null> {
   const guildSettings = client.guildConfig!.get(input.guildId);
 
@@ -51,6 +52,10 @@ export async function createCase(
     return null;
   }
 
+  if (automatic && !casePlugin.logAutomaticActions) {
+    return null;
+  }
+
   const guild = await client.guilds.fetch(input.guildId);
 
   const actualGuildUUID = await trpc.bot.checkGuild.query(input.guildId);
@@ -64,7 +69,7 @@ export async function createCase(
 
   let channel: GuildTextBasedChannel | null = null;
 
-  if (casePlugin.casesChannel) {
+  if (casePlugin.casesChannel !== "") {
     const channelFetch = await guild.channels.fetch(casePlugin.casesChannel);
 
     if (channelFetch && channelFetch.isTextBased()) {

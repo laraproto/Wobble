@@ -32,13 +32,16 @@ export default {
     const reason =
       interaction.options.getString("reason") ?? "No reason provided";
 
-    await createCase({
-      caseType: "note",
-      guildId: interaction.guild!.id,
-      creatorId: interaction.user.id,
-      targetId: target.id,
-      reason,
-    });
+    await createCase(
+      {
+        caseType: "note",
+        guildId: interaction.guild!.id,
+        creatorId: interaction.user.id,
+        targetId: target.id,
+        reason,
+      },
+      false,
+    );
 
     await interaction.reply({
       content: `Added a note to ${target.tag}`,

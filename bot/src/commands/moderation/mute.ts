@@ -66,13 +66,16 @@ export default {
       return;
     }
 
-    await createCase({
-      caseType: "mute",
-      guildId: interaction.guild!.id,
-      creatorId: interaction.user.id,
-      targetId: target.id,
-      reason,
-    });
+    await createCase(
+      {
+        caseType: "mute",
+        guildId: interaction.guild!.id,
+        creatorId: interaction.user.id,
+        targetId: target.id,
+        reason,
+      },
+      false,
+    );
 
     await target.timeout(duration.asMilliseconds(), reason);
 
