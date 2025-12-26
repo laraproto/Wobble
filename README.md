@@ -2,6 +2,10 @@
 
 Silly discord bot with the intention of being incredibly easy to run, drop an executable and run
 
+## Usage
+
+To use, start executable, go to localhost:3000 (or set up a reverse proxy as the order doesn't particularly matter), if port is taken it can be changed using the PORT environment variable, most install steps should be guided
+
 ## Info
 
 This project is loosely based of Zeppelin but instead of it being configured with yaml it has a really really ugly ui to do so, and probably not very optimised, this bot is basically if you took something easy, overcomplicated it for no reason and lost your shit making it
