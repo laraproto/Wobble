@@ -704,8 +704,17 @@ export function Counters() {
                                                       type="button"
                                                       variant="destructive"
                                                       onClick={() => {
+                                                        const newOpenStates = {
+                                                          ...openTriggerCollapsibles,
+                                                        };
+                                                        newOpenStates[
+                                                          `${index}-${trigger.name}`
+                                                        ] = false;
+                                                        setOpenTriggerCollapsibles(
+                                                          newOpenStates,
+                                                        );
                                                         field.removeValue(
-                                                          index,
+                                                          indexTrigger,
                                                         );
                                                       }}
                                                     >

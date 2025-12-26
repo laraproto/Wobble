@@ -3,6 +3,7 @@ import { client } from "#botBase";
 import { handleAutomodActions } from "./automod";
 import { parseConfig } from "@wobble/website/configParser";
 import { checkLevel } from "./level";
+import trpc from "./trpc";
 
 export async function processCounterTrigger(trigger: CounterTriggerEvent) {
   const guildSettings = client.guildConfig!.get(trigger.guild_id);
@@ -10,6 +11,10 @@ export async function processCounterTrigger(trigger: CounterTriggerEvent) {
   if (!guildSettings) return;
 
   if (!guildSettings.plugins.automod?.config.rules) return;
+
+  const guildInfo = await trpc.bot.checkGuild.query(trigger.guild_id);
+
+  if (!guildInfo.guild) return;
 
   if (trigger.per_user && !trigger.user_id) return;
 
@@ -57,6 +62,7 @@ export async function processCounterTrigger(trigger: CounterTriggerEvent) {
         ruleConfig.actions,
         trigger.user_id,
         trigger.guild_id,
+        guildInfo.guild.uuid,
       );
     }
   }

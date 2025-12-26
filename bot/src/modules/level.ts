@@ -15,14 +15,11 @@ export async function checkLevel(
 
   const userLevel = guildSettings.levels[userId];
 
-  if (!userLevel) return 0;
-
-  if (!guild) return userLevel;
+  if (!guild) return userLevel ?? 0;
 
   const member = await guild.members.fetch(userId).catch(() => null);
 
-  if (!member) return userLevel;
-
+  if (!member) return userLevel ?? 0;
   let highestRoleLevel = 0;
   for (const roleId of member.roles.cache.keys()) {
     const roleLevel = guildSettings.levels[roleId];
@@ -31,5 +28,5 @@ export async function checkLevel(
     }
   }
 
-  return Math.max(userLevel, highestRoleLevel);
+  return Math.max(userLevel ?? 0, highestRoleLevel);
 }

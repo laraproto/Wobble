@@ -1,12 +1,10 @@
 import { z } from "zod";
 import {
-  durationParsingRegex,
   operationParsingRegex,
   automodSchema,
   baseAutomodRuleObjectSchema,
   botConfigSchema,
 } from "#/types/modules";
-import { zodSnowflake } from "#/types/discord";
 import { guildProcedure, router } from "#modules/trpc";
 import { applyGuildSettings } from "#modules/guild/index.ts";
 
@@ -15,7 +13,7 @@ const automodRuleObjectSchema = z.object({
   triggers: z.array(
     z.object({
       automod_trigger: z.object({
-        ruleId: zodSnowflake,
+        ruleId: z.string(),
       }),
       counter_trigger: z.object({
         counter: z.string(),
@@ -32,7 +30,7 @@ const automodRuleObjectSchema = z.object({
         .default("Automod rule {{rule_name}} triggered"),
     }),
     mute: z.object({
-      duration: z.string().min(0).max(32).regex(durationParsingRegex),
+      duration: z.string().min(0).max(32),
       reason: z
         .string()
         .min(0)
@@ -46,7 +44,7 @@ const automodRuleObjectSchema = z.object({
         .default("Automod rule {{rule_name}} triggered"),
     }),
     ban: z.object({
-      duration: z.string().min(0).max(32).regex(durationParsingRegex),
+      duration: z.string().min(0).max(32),
       reason: z
         .string()
         .max(400)
@@ -297,6 +295,21 @@ const guildAutomodRouter = router({
           triggers,
           actions,
         };
+      }
+
+      for (const override of input.overrides) {
+        const rules: Record<string, { enabled: boolean }> = {};
+
+        override.config.rules.forEach((r) => {
+          rules[r.name] = { enabled: r.rule.enabled };
+        });
+
+        automodConversion.overrides!.push({
+          level: override.level,
+          config: {
+            rules,
+          },
+        });
       }
 
       const updatedAutomod =

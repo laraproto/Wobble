@@ -1,5 +1,5 @@
 import { type BaseAutomodRuleObjectSchema } from "#/types/modules";
-import { GuildMember, Guild } from "discord.js";
+import { GuildMember, Guild, DiscordAPIError } from "discord.js";
 import { client } from "#botBase";
 import handlebars from "handlebars";
 import { createCase } from "./cases";
@@ -96,7 +96,9 @@ export async function handleAutomodActions(
 
   const user = await guild.members.fetch(userId);
 
+  console.log("About to run automod actions");
   if (user) {
+    console.log("Running automod actions for user:", user.user.tag);
     await userAutomodActions(ruleName, actions, user, guild, guildUUID);
   }
 }
@@ -114,172 +116,193 @@ async function userAutomodActions(
 
   const actionKeys = Object.keys(actions) as (keyof typeof actions)[];
 
-  for await (const actionKey of actionKeys) {
-    const action = actions[actionKey];
+  try {
+    for await (const actionKey of actionKeys) {
+      const action = actions[actionKey];
 
-    console.log(`Processing action: ${actionKey}`);
+      console.log(`Processing action: ${actionKey}`);
 
-    // This is guaranteed to exist but make typescript happy
-    if (!action) return;
+      // This is guaranteed to exist but make typescript happy
+      if (!action) return;
 
-    switch (actionKey) {
-      case "warn": {
-        const warnAction = action as NonNullable<typeof actions.warn>;
+      switch (actionKey) {
+        case "warn": {
+          const warnAction = action as NonNullable<typeof actions.warn>;
 
-        const handlebarsTemplate = handlebars.compile(warnAction.reason, {
-          noEscape: true,
-        });
-
-        const reason = handlebarsTemplate({
-          ruleName,
-        });
-
-        createCase(
-          {
-            guildId: guild.id,
-            caseType: "warn",
-            targetId: user.id,
-            creatorId: null,
-            reason,
-          },
-          true,
-        );
-
-        break;
-      }
-      case "mute": {
-        const muteAction = action as NonNullable<typeof actions.mute>;
-
-        const handlebarsTemplate = handlebars.compile(muteAction.reason, {
-          noEscape: true,
-        });
-
-        const reason = handlebarsTemplate({
-          ruleName,
-        });
-
-        await createCase(
-          {
-            guildId: guild.id,
-            caseType: "mute",
-            targetId: user.id,
-            creatorId: null,
-            reason,
-          },
-          true,
-        );
-
-        await user.timeout(
-          (await makeDuration(muteAction.duration)).asMilliseconds(),
-          muteAction.reason,
-        );
-
-        break;
-      }
-      case "kick": {
-        const kickAction = action as NonNullable<typeof actions.kick>;
-
-        const handlebarsTemplate = handlebars.compile(kickAction.reason, {
-          noEscape: true,
-        });
-
-        const reason = handlebarsTemplate({
-          ruleName,
-        });
-
-        await createCase(
-          {
-            guildId: guild.id,
-            caseType: "kick",
-            targetId: user.id,
-            creatorId: null,
-            reason,
-          },
-          true,
-        );
-
-        await user.kick(kickAction.reason);
-
-        break;
-      }
-      case "ban": {
-        const banAction = action as NonNullable<typeof actions.ban>;
-
-        const handlebarsTemplate = handlebars.compile(banAction.reason, {
-          noEscape: true,
-        });
-
-        const reason = handlebarsTemplate({
-          ruleName,
-        });
-
-        const caseResult = await createCase(
-          {
-            guildId: guild.id,
-            caseType: "ban",
-            targetId: user.id,
-            creatorId: null,
-            reason,
-          },
-          true,
-        );
-
-        if (!caseResult || !caseResult.data) return;
-
-        if (banAction.duration) {
-          const duration = await makeDuration(banAction.duration);
-
-          const result = await trpc.bot.plugins.modActions.createBan.mutate({
-            guildId: guildUUID,
-            targetId: user.id,
-            caseId: caseResult.data.uuid,
-            reason,
-            duration: duration.asMilliseconds(),
+          const handlebarsTemplate = handlebars.compile(warnAction.reason, {
+            noEscape: true,
           });
 
-          if (!result.success) {
-            console.log(`Failed to create timed ban: ${result.message}`);
-            return;
+          const reason = handlebarsTemplate({
+            ruleName,
+          });
+
+          createCase(
+            {
+              guildId: guild.id,
+              caseType: "warn",
+              targetId: user.id,
+              creatorId: null,
+              reason,
+            },
+            true,
+          );
+
+          break;
+        }
+        case "mute": {
+          const muteAction = action as NonNullable<typeof actions.mute>;
+
+          const handlebarsTemplate = handlebars.compile(muteAction.reason, {
+            noEscape: true,
+          });
+
+          const reason = handlebarsTemplate({
+            ruleName,
+          });
+
+          await createCase(
+            {
+              guildId: guild.id,
+              caseType: "mute",
+              targetId: user.id,
+              creatorId: null,
+              reason,
+            },
+            true,
+          );
+
+          await user.timeout(
+            (await makeDuration(muteAction.duration)).asMilliseconds(),
+            muteAction.reason,
+          );
+
+          break;
+        }
+        case "kick": {
+          const kickAction = action as NonNullable<typeof actions.kick>;
+
+          const handlebarsTemplate = handlebars.compile(kickAction.reason, {
+            noEscape: true,
+          });
+
+          const reason = handlebarsTemplate({
+            ruleName,
+          });
+
+          await createCase(
+            {
+              guildId: guild.id,
+              caseType: "kick",
+              targetId: user.id,
+              creatorId: null,
+              reason,
+            },
+            true,
+          );
+
+          await user.kick(kickAction.reason);
+
+          break;
+        }
+        case "ban": {
+          const banAction = action as NonNullable<typeof actions.ban>;
+
+          const handlebarsTemplate = handlebars.compile(banAction.reason, {
+            noEscape: true,
+          });
+
+          const reason = handlebarsTemplate({
+            ruleName,
+          });
+
+          const caseResult = await createCase(
+            {
+              guildId: guild.id,
+              caseType: "ban",
+              targetId: user.id,
+              creatorId: null,
+              reason,
+            },
+            true,
+          );
+
+          if (!caseResult || !caseResult.data) return;
+
+          if (banAction.duration) {
+            const duration = await makeDuration(banAction.duration);
+
+            const result = await trpc.bot.plugins.modActions.createBan.mutate({
+              guildId: guildUUID,
+              targetId: user.id,
+              caseId: caseResult.data.uuid,
+              reason,
+              duration: duration.asMilliseconds(),
+            });
+
+            if (!result.success) {
+              console.log(`Failed to create timed ban: ${result.message}`);
+              return;
+            }
+
+            await user.ban({
+              reason: banAction.reason,
+              deleteMessageSeconds: 3600,
+            });
           }
 
-          await user.ban({
-            reason: banAction.reason,
-            deleteMessageSeconds: 3600,
-          });
+          break;
         }
+        case "add_counter": {
+          const addCounterAction = action as NonNullable<
+            typeof actions.add_counter
+          >;
 
-        break;
+          await trpc.bot.plugins.counters.incrementCounter.mutate({
+            guildId: guild.id,
+            counterName: addCounterAction.counter,
+            value: addCounterAction.value,
+            user_id: user.id,
+            channel_id: undefined,
+          });
+
+          break;
+        }
+        case "remove_counter": {
+          const removeCounterAction = action as NonNullable<
+            typeof actions.remove_counter
+          >;
+
+          await trpc.bot.plugins.counters.decrementCounter.mutate({
+            guildId: guild.id,
+            counterName: removeCounterAction.counter,
+            value: removeCounterAction.value,
+            user_id: user.id,
+            channel_id: undefined,
+          });
+
+          break;
+        }
       }
-      case "add_counter": {
-        const addCounterAction = action as NonNullable<
-          typeof actions.add_counter
-        >;
+    }
+  } catch (err) {
+    const discordError = err as DiscordAPIError;
 
-        await trpc.bot.plugins.counters.incrementCounter.mutate({
+    if (discordError.code === 50013) {
+      console.log(
+        `Missing Permissions to perform automod action on user ${user.user.tag}`,
+      );
+      createCase(
+        {
           guildId: guild.id,
-          counterName: addCounterAction.counter,
-          value: addCounterAction.value,
-          user_id: user.id,
-          channel_id: undefined,
-        });
-
-        break;
-      }
-      case "remove_counter": {
-        const removeCounterAction = action as NonNullable<
-          typeof actions.remove_counter
-        >;
-
-        await trpc.bot.plugins.counters.decrementCounter.mutate({
-          guildId: guild.id,
-          counterName: removeCounterAction.counter,
-          value: removeCounterAction.value,
-          user_id: user.id,
-          channel_id: undefined,
-        });
-
-        break;
-      }
+          caseType: "softban",
+          targetId: user.id,
+          creatorId: null,
+          reason: `!! I CANNOT PERFORM AN ACTION ON ${user.user.tag} MY ROLE MAY BE TOO LOW OR MISSING PERMISSIONS !!`,
+        },
+        false,
+      );
+      return;
     }
   }
 }
