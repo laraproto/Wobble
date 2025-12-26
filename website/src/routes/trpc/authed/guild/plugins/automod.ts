@@ -200,7 +200,37 @@ const guildAutomodRouter = router({
       });
     }
 
-    return convertedAutomod;
+    const overrideConfig: AutomodFormSchema["overrides"] = [];
+    for (const override of automodPlugin.overrides || []) {
+      const rules: {
+        name: string;
+        rule: {
+          enabled: boolean;
+        };
+      }[] = [];
+
+      for (const ruleName in override.config.rules) {
+        const ruleConfig = override.config.rules[ruleName];
+
+        if (!ruleConfig) continue;
+
+        rules.push({
+          name: ruleName,
+          rule: {
+            enabled: ruleConfig.enabled,
+          },
+        });
+      }
+
+      overrideConfig.push({
+        level: override.level,
+        config: {
+          rules,
+        },
+      });
+    }
+
+    return { ...convertedAutomod, overrides: overrideConfig };
   }),
   set: guildProcedure
     .input(automodFormSchema)
