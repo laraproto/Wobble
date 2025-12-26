@@ -9,6 +9,7 @@ import guildCasesRouter from "./plugins/cases";
 import guildModActionsRouter from "./plugins/modActions";
 import guildLevelsRouter from "./plugins/levels";
 import guildCountersRouter from "./plugins/counters";
+import guildAutomodRouter from "./plugins/automod";
 
 const guildRouter = router({
   refreshGuild: guildProcedure.mutation(async ({ input }) => {
@@ -104,6 +105,7 @@ const guildRouter = router({
   modActions: guildModActionsRouter,
   levels: guildLevelsRouter,
   counters: guildCountersRouter,
+  automod: guildAutomodRouter,
 });
 
 export default guildRouter;

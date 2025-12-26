@@ -196,7 +196,27 @@ export type BaseAutomodRuleObjectSchema = z.infer<
 
 export type BaseAutomodSchema = z.infer<typeof baseAutomodSchema>;
 
-export const automodSchema = plugin(baseAutomodSchema);
+export const automodSchema = z
+  .object({
+    //@ts-expect-error this works, loads default config if none provided
+    config: baseAutomodSchema.prefault({}),
+    overrides: z
+      .array(
+        z.object({
+          level: z.string().regex(operationParsingRegex),
+          config: z.object({
+            rules: z.record(
+              z.string(),
+              baseAutomodRuleObjectSchema.pick({
+                enabled: true,
+              }),
+            ),
+          }),
+        }),
+      )
+      .optional(),
+  })
+  .optional();
 
 export const baseCasesSchema = z.object({
   logAutomaticActions: z.boolean().default(true),
