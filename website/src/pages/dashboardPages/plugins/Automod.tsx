@@ -29,6 +29,14 @@ import { trpc } from "#lib/trpc";
 
 import { toast } from "sonner";
 
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "#/components/ui/collapsible";
+import { ChevronsUpDown, Trash, PlusCircle } from "lucide-react";
+import { useState } from "react";
+
 const automodRuleObjectSchema = z.object({
   enabled: z.boolean(),
   triggers: z.array(
@@ -104,6 +112,20 @@ export function Automod() {
     trpc.authed.guild.automod.set.mutationOptions(),
   );
 
+  const [openCollapsibles, setOpenCollapsibles] = useState<boolean[]>([]);
+
+  const [openOverridesCollapsibles, setOpenOverridesCollapsibles] = useState<
+    boolean[]
+  >([]);
+
+  const [openTriggerCollapsibles, setOpenTriggerCollapsibles] = useState<{
+    [k: string]: boolean;
+  }>({});
+
+  const [openActionCollapsibles, setOpenActionCollapsibles] = useState<{
+    [k: string]: boolean;
+  }>({});
+
   const form = useForm({
     defaultValues: {
       config: {
@@ -135,7 +157,9 @@ export function Automod() {
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl font-bold">Automod</CardTitle>
-          <CardDescription>Configure automod module</CardDescription>
+          <CardDescription>
+            Configure automod module (This UI is ugly af)
+          </CardDescription>
           <CardContent className="mt-4">
             <form
               id="automod-form"
@@ -145,12 +169,543 @@ export function Automod() {
                 void form.handleSubmit();
               }}
             >
-              <div className="grid grid-cols-3 gap-4">
-                <FieldGroup className="flex flex-col gap-4"></FieldGroup>
+              <div>
+                <FieldGroup>
+                  <form.Field name="config.rules" mode="array">
+                    {(field) => (
+                      <div>
+                        <div className="flex mt-4 mb-4 justify-between items-center">
+                          <h1 className="text-2xl font-bold -ml-6">Rules</h1>
+                          <Button
+                            type="button"
+                            onClick={() => {
+                              field.pushValue({
+                                name: "",
+                                rule: {
+                                  enabled: true,
+                                  triggers: [],
+                                  actions: {
+                                    warn: { reason: "" },
+                                    mute: { duration: "", reason: "" },
+                                    kick: { reason: "" },
+                                    ban: { duration: "", reason: "" },
+                                    add_counter: { counter: "", value: 0 },
+                                    remove_counter: { counter: "", value: 0 },
+                                  },
+                                },
+                              });
+                            }}
+                          >
+                            <PlusCircle className="ml-auto" /> Add Rule
+                          </Button>
+                        </div>
+                        {field.state.value.map((rule, index) => {
+                          return (
+                            <Collapsible
+                              key={index}
+                              open={openCollapsibles[index]}
+                              onOpenChange={(isOpen) => {
+                                const newOpenStates = [...openCollapsibles];
+                                newOpenStates[index] = isOpen;
+                                setOpenCollapsibles(newOpenStates);
+                              }}
+                              className="flex flex-col border rounded-md w-full bg-muted gap-2 mb-2"
+                            >
+                              <div className="ml-2 flex items-center justify-between">
+                                <h4 className="text-sm font-semibold">
+                                  Rule {rule.name}
+                                </h4>
+                                <CollapsibleTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="size-8 bg-background"
+                                  >
+                                    <ChevronsUpDown />
+                                    <span className="sr-only">Toggle</span>
+                                  </Button>
+                                </CollapsibleTrigger>
+                              </div>
+                              <CollapsibleContent className="flex flex-col pb-2 ml-2 bg-muted space-y-2">
+                                <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2 pr-2">
+                                  <form.Field
+                                    name={`config.rules[${index}].name`}
+                                    children={(field) => {
+                                      const isInvalid =
+                                        field.state.meta.isTouched &&
+                                        !field.state.meta.isValid;
 
-                <FieldGroup className="flex flex-col gap-4"></FieldGroup>
+                                      return (
+                                        <Field data-invalid={isInvalid}>
+                                          <FieldLabel htmlFor={field.name}>
+                                            Name
+                                          </FieldLabel>
+                                          <Input
+                                            id={field.name}
+                                            name={field.name}
+                                            value={field.state.value}
+                                            onBlur={field.handleBlur}
+                                            onChange={(e) =>
+                                              field.handleChange(e.target.value)
+                                            }
+                                            aria-invalid={isInvalid}
+                                          />
+                                          {isInvalid && (
+                                            <FieldError
+                                              errors={field.state.meta.errors}
+                                            />
+                                          )}
+                                        </Field>
+                                      );
+                                    }}
+                                  />
+                                  <form.Field
+                                    name={`config.rules[${index}].rule.enabled`}
+                                    children={(field) => {
+                                      const isInvalid =
+                                        field.state.meta.isTouched &&
+                                        !field.state.meta.isValid;
 
-                <FieldGroup className="flex flex-col gap-4"></FieldGroup>
+                                      return (
+                                        <Field
+                                          data-invalid={isInvalid}
+                                          orientation="horizontal"
+                                          className="mt-6"
+                                        >
+                                          <Checkbox
+                                            id={field.name}
+                                            name={field.name}
+                                            checked={field.state.value}
+                                            onBlur={field.handleBlur}
+                                            onCheckedChange={(e) =>
+                                              field.handleChange(e as boolean)
+                                            }
+                                            aria-invalid={isInvalid}
+                                          />
+                                          <FieldContent>
+                                            <FieldLabel htmlFor={field.name}>
+                                              Enabled
+                                            </FieldLabel>
+                                            <FieldDescription className="text-left">
+                                              Rule is enabled (can be changed in
+                                              override by perm level)
+                                            </FieldDescription>
+                                          </FieldContent>
+                                          {isInvalid && (
+                                            <FieldError
+                                              errors={field.state.meta.errors}
+                                            />
+                                          )}
+                                        </Field>
+                                      );
+                                    }}
+                                  />
+                                </FieldGroup>
+
+                                <FieldGroup>
+                                  <form.Field
+                                    name={`config.rules[${index}].rule.triggers`}
+                                    mode="array"
+                                  >
+                                    {(field) => (
+                                      <div>
+                                        <div className="mb-2">
+                                          <Button
+                                            type="button"
+                                            onClick={() => {
+                                              field.pushValue({
+                                                automod_trigger: {
+                                                  ruleId: "",
+                                                },
+                                                counter_trigger: {
+                                                  counter: "",
+                                                  trigger: "",
+                                                },
+                                              });
+                                            }}
+                                          >
+                                            <PlusCircle className="ml-auto" />
+                                            Add Rule
+                                          </Button>
+                                        </div>
+                                        {field.state.value.map(
+                                          (trigger, indexTrigger) => {
+                                            return (
+                                              <Collapsible
+                                                key={index}
+                                                open={
+                                                  openTriggerCollapsibles[
+                                                    `${index}-${indexTrigger}`
+                                                  ]
+                                                }
+                                                onOpenChange={(isOpen) => {
+                                                  const newOpenStates = {
+                                                    ...openTriggerCollapsibles,
+                                                  };
+                                                  newOpenStates[
+                                                    `${index}-${indexTrigger}`
+                                                  ] = isOpen;
+                                                  setOpenTriggerCollapsibles(
+                                                    newOpenStates,
+                                                  );
+                                                }}
+                                                className="flex flex-col border rounded-md w-full bg-background gap-2 mb-2"
+                                              >
+                                                <div className="ml-2 flex items-center justify-between">
+                                                  <h4 className="text-sm font-semibold">
+                                                    Trigger Section{" "}
+                                                    {indexTrigger + 1} (Empty
+                                                    values for trigger type
+                                                    means it&apos;s not active)
+                                                  </h4>
+                                                  <CollapsibleTrigger asChild>
+                                                    <Button
+                                                      variant="ghost"
+                                                      size="icon"
+                                                      className="size-8 bg-muted"
+                                                    >
+                                                      <ChevronsUpDown />
+                                                      <span className="sr-only">
+                                                        Toggle
+                                                      </span>
+                                                    </Button>
+                                                  </CollapsibleTrigger>
+                                                </div>
+                                                <CollapsibleContent className="flex flex-col pb-2 ml-2 bg-background space-y-2">
+                                                  <h4 className="text-lg font-semibold">
+                                                    Discord Automod Activation
+                                                  </h4>
+                                                  <FieldGroup>
+                                                    <form.Field
+                                                      name={`config.rules[${index}].rule.triggers[${indexTrigger}].automod_trigger.ruleId`}
+                                                      children={(field) => {
+                                                        const isInvalid =
+                                                          field.state.meta
+                                                            .isTouched &&
+                                                          !field.state.meta
+                                                            .isValid;
+
+                                                        return (
+                                                          <Field
+                                                            data-invalid={
+                                                              isInvalid
+                                                            }
+                                                          >
+                                                            <FieldLabel
+                                                              htmlFor={
+                                                                field.name
+                                                              }
+                                                            >
+                                                              Rule ID (Discord
+                                                              Snowflake)
+                                                            </FieldLabel>
+                                                            <Input
+                                                              id={field.name}
+                                                              name={field.name}
+                                                              value={
+                                                                field.state
+                                                                  .value
+                                                              }
+                                                              onBlur={
+                                                                field.handleBlur
+                                                              }
+                                                              onChange={(e) =>
+                                                                field.handleChange(
+                                                                  e.target
+                                                                    .value,
+                                                                )
+                                                              }
+                                                              aria-invalid={
+                                                                isInvalid
+                                                              }
+                                                            />
+                                                            {isInvalid && (
+                                                              <FieldError
+                                                                errors={
+                                                                  field.state
+                                                                    .meta.errors
+                                                                }
+                                                              />
+                                                            )}
+                                                          </Field>
+                                                        );
+                                                      }}
+                                                    />
+                                                  </FieldGroup>
+
+                                                  <h4 className="text-lg font-semibold">
+                                                    Counter trigger
+                                                  </h4>
+                                                  <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2 pr-2">
+                                                    <form.Field
+                                                      name={`config.rules[${index}].rule.triggers[${indexTrigger}].counter_trigger.counter`}
+                                                      children={(field) => {
+                                                        const isInvalid =
+                                                          field.state.meta
+                                                            .isTouched &&
+                                                          !field.state.meta
+                                                            .isValid;
+
+                                                        return (
+                                                          <Field
+                                                            data-invalid={
+                                                              isInvalid
+                                                            }
+                                                          >
+                                                            <FieldLabel
+                                                              htmlFor={
+                                                                field.name
+                                                              }
+                                                            >
+                                                              Counter Name
+                                                            </FieldLabel>
+                                                            <Input
+                                                              id={field.name}
+                                                              name={field.name}
+                                                              value={
+                                                                field.state
+                                                                  .value
+                                                              }
+                                                              onBlur={
+                                                                field.handleBlur
+                                                              }
+                                                              onChange={(e) =>
+                                                                field.handleChange(
+                                                                  e.target
+                                                                    .value,
+                                                                )
+                                                              }
+                                                              aria-invalid={
+                                                                isInvalid
+                                                              }
+                                                            />
+                                                            {isInvalid && (
+                                                              <FieldError
+                                                                errors={
+                                                                  field.state
+                                                                    .meta.errors
+                                                                }
+                                                              />
+                                                            )}
+                                                          </Field>
+                                                        );
+                                                      }}
+                                                    />
+                                                    <form.Field
+                                                      name={`config.rules[${index}].rule.triggers[${indexTrigger}].counter_trigger.trigger`}
+                                                      children={(field) => {
+                                                        const isInvalid =
+                                                          field.state.meta
+                                                            .isTouched &&
+                                                          !field.state.meta
+                                                            .isValid;
+
+                                                        return (
+                                                          <Field
+                                                            data-invalid={
+                                                              isInvalid
+                                                            }
+                                                          >
+                                                            <FieldLabel
+                                                              htmlFor={
+                                                                field.name
+                                                              }
+                                                            >
+                                                              Trigger Name
+                                                            </FieldLabel>
+                                                            <Input
+                                                              id={field.name}
+                                                              name={field.name}
+                                                              value={
+                                                                field.state
+                                                                  .value
+                                                              }
+                                                              onBlur={
+                                                                field.handleBlur
+                                                              }
+                                                              onChange={(e) =>
+                                                                field.handleChange(
+                                                                  e.target
+                                                                    .value,
+                                                                )
+                                                              }
+                                                              aria-invalid={
+                                                                isInvalid
+                                                              }
+                                                            />
+                                                            {isInvalid && (
+                                                              <FieldError
+                                                                errors={
+                                                                  field.state
+                                                                    .meta.errors
+                                                                }
+                                                              />
+                                                            )}
+                                                          </Field>
+                                                        );
+                                                      }}
+                                                    />
+                                                  </FieldGroup>
+
+                                                  <div className="flex mt-4 gap-2">
+                                                    <Button
+                                                      type="button"
+                                                      variant="destructive"
+                                                      onClick={() => {
+                                                        field.removeValue(
+                                                          index,
+                                                        );
+                                                      }}
+                                                    >
+                                                      <Trash className="ml-auto" />{" "}
+                                                      Delete
+                                                    </Button>
+                                                  </div>
+                                                </CollapsibleContent>
+                                              </Collapsible>
+                                            );
+                                          },
+                                        )}
+                                      </div>
+                                    )}
+                                  </form.Field>
+                                </FieldGroup>
+
+                                <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2 pr-2"></FieldGroup>
+
+                                <FieldGroup className="flex flex-col gap-4 mt-8"></FieldGroup>
+
+                                <div className="flex mt-4 gap-2">
+                                  <Button
+                                    type="button"
+                                    variant="destructive"
+                                    onClick={() => {
+                                      field.removeValue(index);
+                                    }}
+                                  >
+                                    <Trash className="ml-auto" /> Delete
+                                  </Button>
+                                </div>
+                              </CollapsibleContent>
+                            </Collapsible>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </form.Field>
+                  <form.Field name="overrides" mode="array">
+                    {(field) => (
+                      <div>
+                        <div className="flex mt-4 mb-4 justify-between items-center">
+                          <h1 className="text-2xl font-bold -ml-6">
+                            Overrides
+                          </h1>
+                          <Button
+                            type="button"
+                            onClick={() => {
+                              field.pushValue({
+                                level: "",
+                                config: {
+                                  rules: [],
+                                },
+                              });
+                            }}
+                          >
+                            <PlusCircle className="ml-auto" /> Add Override
+                          </Button>
+                        </div>
+                        {field.state.value.map((override, index) => {
+                          return (
+                            <Collapsible
+                              key={index}
+                              open={openOverridesCollapsibles[index]}
+                              onOpenChange={(isOpen) => {
+                                const newOpenStates = [
+                                  ...openOverridesCollapsibles,
+                                ];
+                                newOpenStates[index] = isOpen;
+                                setOpenOverridesCollapsibles(newOpenStates);
+                              }}
+                              className="flex flex-col border rounded-md w-full bg-muted gap-2 mb-2"
+                            >
+                              <div className="ml-2 flex items-center justify-between">
+                                <h4 className="text-sm font-semibold">
+                                  Override for {override.level}
+                                </h4>
+                                <CollapsibleTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="size-8 bg-background"
+                                  >
+                                    <ChevronsUpDown />
+                                    <span className="sr-only">Toggle</span>
+                                  </Button>
+                                </CollapsibleTrigger>
+                              </div>
+                              <CollapsibleContent className="flex flex-col pb-2 ml-2 bg-muted space-y-2">
+                                <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2 pr-2">
+                                  <form.Field
+                                    name={`overrides[${index}].level`}
+                                    children={(field) => {
+                                      const isInvalid =
+                                        field.state.meta.isTouched &&
+                                        !field.state.meta.isValid;
+
+                                      return (
+                                        <Field data-invalid={isInvalid}>
+                                          <FieldLabel htmlFor={field.name}>
+                                            Level
+                                          </FieldLabel>
+                                          <Input
+                                            id={field.name}
+                                            name={field.name}
+                                            value={field.state.value}
+                                            onBlur={field.handleBlur}
+                                            onChange={(e) =>
+                                              field.handleChange(e.target.value)
+                                            }
+                                            aria-invalid={isInvalid}
+                                          />
+                                          <FieldDescription>
+                                            Allowed operators are &gt;, &gt;=,
+                                            &lt;, &lt;=, =
+                                          </FieldDescription>
+                                          {isInvalid && (
+                                            <FieldError
+                                              errors={field.state.meta.errors}
+                                            />
+                                          )}
+                                        </Field>
+                                      );
+                                    }}
+                                  />
+                                </FieldGroup>
+                                <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2 pr-2"></FieldGroup>
+
+                                <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2 pr-2"></FieldGroup>
+
+                                <FieldGroup className="flex flex-col gap-4 mt-8"></FieldGroup>
+
+                                <div className="flex mt-4 gap-2">
+                                  <Button
+                                    type="button"
+                                    variant="destructive"
+                                    onClick={() => {
+                                      field.removeValue(index);
+                                    }}
+                                  >
+                                    <Trash className="ml-auto" /> Delete
+                                  </Button>
+                                </div>
+                              </CollapsibleContent>
+                            </Collapsible>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </form.Field>
+                </FieldGroup>
               </div>
             </form>
           </CardContent>
