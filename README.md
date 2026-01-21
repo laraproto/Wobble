@@ -1,6 +1,10 @@
-# Wobble
+# Wobble SFC
 
 Silly discord bot with the intention of being incredibly easy to run, drop an executable and run
+
+## Deprecation and Retrospective
+
+I made this initially to try and make something ultra portable, because of several bundler bugs and such i've had to do really dumb workarounds, and also compromise on SSR, doing this was fascinating but not worth my time to maintain, I'm going back to monorepos and you might see a revival of Wobble sometime
 
 ## Usage
 
